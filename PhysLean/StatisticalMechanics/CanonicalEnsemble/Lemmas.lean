@@ -266,7 +266,10 @@ theorem helmholtzFreeEnergy_eq_meanEnergy_sub_temp_mul_thermodynamicEntropy
       _ = _ := by
               simp [add_comm, sub_eq_add_neg, mul_comm, mul_left_comm, mul_assoc]
   have hkβT : T.val * (kB * (T.β : ℝ)) = 1 := by
-    simp [hkβ, hTne]
+    rw [hkβ]
+    field_simp [hTne]
+  have hkβT' : T.val * (kB * (kB⁻¹ * T.toReal⁻¹)) = 1 := by
+    simpa [Temperature.β, one_div, mul_comm, mul_left_comm, mul_assoc] using hkβT
   have h_rhs :
       𝓒.meanEnergy T - T.val * 𝓒.thermodynamicEntropy T
         = -kB * T.val *
@@ -289,7 +292,7 @@ theorem helmholtzFreeEnergy_eq_meanEnergy_sub_temp_mul_thermodynamicEntropy
       _ = 𝓒.meanEnergy T - 1 * 𝓒.meanEnergy T
             - T.val * kB * Real.log (𝓒.mathematicalPartitionFunction T)
             + T.val * kB * 𝓒.dof * Real.log 𝓒.phaseSpaceunit := by
-              simp [hkβT, mul_comm, mul_assoc]
+              simp [hkβT', mul_comm, mul_assoc]
       _ = -kB * T.val *
             (Real.log (𝓒.mathematicalPartitionFunction T)
               - (𝓒.dof : ℝ) * Real.log 𝓒.phaseSpaceunit) := by
@@ -518,12 +521,11 @@ lemma meanEnergy_eq_neg_deriv_log_mathZ_of_beta
           (fun β : ℝ => Real.log (∫ i, Real.exp (-β * 𝓒.energy i) ∂𝓒.μ))
           (Set.Ioi 0) (T.β : ℝ)) := by
   set f : ℝ → ℝ := fun β => ∫ i, Real.exp (-β * 𝓒.energy i) ∂𝓒.μ
-  have hβ_pos : 0 < (T.β : ℝ) := beta_pos T hT_pos
+  have hβ_pos : 0 < (T.β : ℝ) := β_pos T hT_pos
   have hZpos : 0 < f (T.β : ℝ) := by
     have hZ := mathematicalPartitionFunction_pos (𝓒:=𝓒) (T:=T)
-    have hEq : f (T.β : ℝ) = 𝓒.mathematicalPartitionFunction T := by
-      simp [f, mathematicalPartitionFunction_eq_integral (𝓒:=𝓒) (T:=T)]
-    simpa [hEq] using hZ
+    simpa [f, mathematicalPartitionFunction_eq_integral (𝓒:=𝓒) (T:=T),
+      Temperature.β, one_div, mul_comm, mul_left_comm, mul_assoc] using hZ
   have h_log :
       HasDerivWithinAt
         (fun β : ℝ => Real.log (f β))
@@ -548,14 +550,12 @@ lemma meanEnergy_eq_neg_deriv_log_mathZ_of_beta
         = (1 / f (T.β : ℝ)) *
             (- ∫ i, 𝓒.energy i * Real.exp (-(T.β : ℝ) * 𝓒.energy i) ∂𝓒.μ) :=
     h_log.derivWithin hUD
-  have h_f_eval :
-      f (T.β : ℝ) = ∫ i, Real.exp (-(T.β : ℝ) * 𝓒.energy i) ∂𝓒.μ := rfl
   have h_ratio :
       (∫ i, 𝓒.energy i * Real.exp (-(T.β : ℝ) * 𝓒.energy i) ∂𝓒.μ) /
           (∫ i, Real.exp (-(T.β : ℝ) * 𝓒.energy i) ∂𝓒.μ)
         = (1 / f (T.β : ℝ)) *
             (∫ i, 𝓒.energy i * Real.exp (-(T.β : ℝ) * 𝓒.energy i) ∂𝓒.μ) := by
-    simp [h_f_eval, div_eq_mul_inv, mul_comm]
+    simp [f, div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
   calc
     𝓒.meanEnergy T = _ := h_mean_ratio
     _ = (1 / f (T.β : ℝ)) *
@@ -611,16 +611,29 @@ lemma log_phys_eq_log_math_sub_const_on_Ioi
       Real.log (𝓒.partitionFunction (Temperature.ofβ (Real.toNNReal β))) =
         -((𝓒.dof : ℝ) * Real.log 𝓒.phaseSpaceunit)
           + Real.log (∫ i, Real.exp (-β * 𝓒.energy i) ∂ 𝓒.μ) := by
-    have h_integral_pos : 0 < ∫ i, Real.exp (-β * 𝓒.energy i) ∂ 𝓒.μ := by
-      have h_eq : ∫ i, Real.exp (-β * 𝓒.energy i) ∂ 𝓒.μ =
-        ∫ i, Real.exp (-(Real.toNNReal β).val * 𝓒.energy i) ∂ 𝓒.μ := by
-        simp [hβnn]
-      rw [h_eq]
-      simp [mathematicalPartitionFunction_eq_integral
-        (𝓒:=𝓒) (T:=Temperature.ofβ (Real.toNNReal β))] at hZpos
-      simp [hZpos]
     have h_beta_eq : (Temperature.ofβ (Real.toNNReal β)).β = Real.toNNReal β := by
-      simp_all only [gt_iff_lt, mem_Ioi, coe_toNNReal', sup_eq_left, log_pow, neg_mul, β_ofβ]
+      simp_all only [gt_iff_lt, mem_Ioi, coe_toNNReal', sup_eq_left, log_pow, β_ofβ]
+    have h_integral_pos : 0 < ∫ i, Real.exp (-β * 𝓒.energy i) ∂ 𝓒.μ := by
+      have h_int_eq0 :
+          ∫ i, Real.exp (-((Temperature.ofβ (Real.toNNReal β)).β : ℝ) * 𝓒.energy i) ∂ 𝓒.μ =
+            𝓒.mathematicalPartitionFunction (Temperature.ofβ (Real.toNNReal β)) := by
+        exact (mathematicalPartitionFunction_eq_integral
+          (𝓒:=𝓒) (T:=Temperature.ofβ (Real.toNNReal β))).symm
+      have h_int_eq : ∫ i, Real.exp (-β * 𝓒.energy i) ∂ 𝓒.μ =
+          𝓒.mathematicalPartitionFunction (Temperature.ofβ (Real.toNNReal β)) := by
+        have h_int_eq1 :
+            ∫ i, Real.exp (-(β * (kB * (kB⁻¹ * 𝓒.energy i)))) ∂ 𝓒.μ =
+              𝓒.mathematicalPartitionFunction (Temperature.ofβ (Real.toNNReal β)) := by
+          simpa [Temperature.β, hβnn, one_div, mul_comm, mul_left_comm, mul_assoc] using h_int_eq0
+        have h_int_eq2 :
+            ∫ i, Real.exp (-(β * (kB * (kB⁻¹ * 𝓒.energy i)))) ∂ 𝓒.μ =
+              ∫ i, Real.exp (-β * 𝓒.energy i) ∂ 𝓒.μ := by
+          refine integral_congr_ae ?_
+          filter_upwards with i
+          field_simp [kB_ne_zero]
+        exact h_int_eq2.symm.trans h_int_eq1
+      rw [h_int_eq]
+      exact hZpos
     rw [partitionFunction_def,
         mathematicalPartitionFunction_eq_integral (𝓒:=𝓒) (T:=Temperature.ofβ (Real.toNNReal β)),
         h_beta_eq,
@@ -663,7 +676,7 @@ lemma derivWithin_log_phys_eq_derivWithin_log_math
   have h_eq' :
       Set.EqOn F_phys (fun β => F_math β - C) (Set.Ioi (0:ℝ)) := by
     simpa [F_phys, F_math] using h_eq
-  have h_mem : (T.β : ℝ) ∈ Set.Ioi (0:ℝ) := beta_pos T hT_pos
+  have h_mem : (T.β : ℝ) ∈ Set.Ioi (0:ℝ) := β_pos T hT_pos
   have h_congr :
       derivWithin F_phys (Set.Ioi 0) (T.β : ℝ)
         = derivWithin (fun β => F_math β - C) (Set.Ioi 0) (T.β : ℝ) := by
@@ -769,12 +782,11 @@ lemma heatCapacity_eq_deriv_meanEnergyBeta
       = (derivWithin (𝓒.meanEnergyBeta) (Set.Ioi 0) (T.β : ℝ))
         * (-1 / (kB * (T.val : ℝ)^2)) := by
   unfold heatCapacity meanEnergy_T
-  have h_U_eq_comp : (𝓒.meanEnergy_T) = fun t : ℝ => (𝓒.meanEnergyBeta) (betaFromReal t) := by
+  have h_U_eq_comp : (𝓒.meanEnergy_T) = fun t : ℝ => (𝓒.meanEnergyBeta) (βFromReal t) := by
     funext t
-    dsimp [meanEnergy_T, meanEnergyBeta, betaFromReal]
-    simp
+    simp only [meanEnergy_T, meanEnergyBeta, βFromReal, Real.toNNReal_coe, Temperature.ofβ_β]
   let dUdβ := derivWithin (𝓒.meanEnergyBeta) (Set.Ioi 0) (T.β : ℝ)
-  have h_chain := chain_rule_T_beta (F:=𝓒.meanEnergyBeta) (F':=dUdβ) T hT_pos hU_deriv
+  have h_chain := chain_rule_T_β (F:=𝓒.meanEnergyBeta) (F':=dUdβ) T hT_pos hU_deriv
   have h_UD :
     UniqueDiffWithinAt ℝ (Set.Ioi (0 : ℝ)) (T.val : ℝ) :=
     (isOpen_Ioi : IsOpen (Set.Ioi (0 : ℝ))).uniqueDiffWithinAt hT_pos

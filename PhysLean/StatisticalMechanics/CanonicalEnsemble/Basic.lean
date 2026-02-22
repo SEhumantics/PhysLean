@@ -370,7 +370,7 @@ lemma μBolt_ne_zero_of_μ_ne_zero (T : Temperature) (h : 𝓒.μ ≠ 0) :
   simp [μBolt] at ⊢ h
   rw [Measure.ext_iff'] at ⊢ h
   simp only [Measure.coe_zero, Pi.zero_apply]
-  have hs : {x | ENNReal.ofReal (rexp (-(↑T.β * 𝓒.energy x))) ≠ 0} = Set.univ := by
+  have hs : {x | ENNReal.ofReal (rexp (-(T.toReal⁻¹ * Constants.kB⁻¹ * 𝓒.energy x))) ≠ 0} = Set.univ := by
     ext i
     simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le, Set.mem_setOf_eq, Set.mem_univ, iff_true]
     exact exp_pos _
@@ -454,7 +454,7 @@ lemma mathematicalPartitionFunction_eq_zero_iff (T : Temperature) [IsFiniteMeasu
   have h : s = Set.univ := by
     ext i
     simp [s]
-    exact exp_pos (-(T.β * 𝓒.energy i))
+    exact exp_pos (-(T.toReal⁻¹ * Constants.kB⁻¹ * 𝓒.energy i))
   change 𝓒.μ s = 0 ↔ 𝓒.μ = 0
   rw [h]
   simp only [Measure.measure_univ_eq_zero]

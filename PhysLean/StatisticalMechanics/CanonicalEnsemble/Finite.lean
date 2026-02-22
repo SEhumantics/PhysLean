@@ -293,8 +293,18 @@ lemma sum_probability_eq_one
   have hZdef := mathematicalPartitionFunction_of_fintype (𝓒:=𝓒) T
   have hZpos := mathematicalPartitionFunction_pos_finite (𝓒:=𝓒) (T:=T)
   have hZne : 𝓒.mathematicalPartitionFunction T ≠ 0 := hZpos.ne'
-  simp [hZdef]
-  simp_all only [neg_mul, ne_eq, not_false_eq_true]
+  have hZdef' : 𝓒.mathematicalPartitionFunction T =
+      ∑ x, rexp (-(T.toReal⁻¹ * kB⁻¹ * 𝓒.energy x)) := by
+    simpa [Temperature.β, one_div, mul_comm, mul_left_comm, mul_assoc] using hZdef
+  have hZne' : ∑ x, rexp (-(T.toReal⁻¹ * kB⁻¹ * 𝓒.energy x)) ≠ 0 := by
+    rw [← hZdef']
+    exact hZne
+  have hnum :
+      ∑ x, rexp (-↑T.β * 𝓒.energy x) = ∑ x, rexp (-(T.toReal⁻¹ * kB⁻¹ * 𝓒.energy x)) := by
+    simp [Temperature.β, one_div, mul_comm, mul_assoc]
+  rw [hZdef']
+  rw [hnum]
+  field_simp [hZne']
 
 /-- The entropy of a finite canonical ensemble (Shannon entropy) is non-negative. -/
 lemma entropy_nonneg [MeasurableSingletonClass ι] [IsFinite 𝓒] [Nonempty ι] (T : Temperature) :
@@ -409,11 +419,29 @@ lemma meanEnergy_Beta_eq_finite [MeasurableSingletonClass ι] [IsFinite 𝓒] (b
     𝓒.meanEnergyBeta b = 𝓒.meanEnergyBetaReal b := by
   let T := Temperature.ofβ (Real.toNNReal b)
   have hT_beta : (T.β : ℝ) = b := by
-    simp [T, Real.toNNReal_of_nonneg hb.le]
+    change ((Temperature.ofβ (Real.toNNReal b)).β : ℝ) = b
+    simpa [Real.toNNReal_of_nonneg hb.le] using
+      congrArg (fun x : NNReal => (x : ℝ)) (Temperature.β_ofβ (Real.toNNReal b))
+  have hT_beta' : T.toReal⁻¹ * kB⁻¹ = b := by
+    simpa [Temperature.β, one_div, mul_comm, mul_left_comm, mul_assoc] using hT_beta
   rw [meanEnergyBeta, meanEnergy_of_fintype 𝓒 T, meanEnergyBetaReal]
   refine Finset.sum_congr rfl fun i _ => ?_
-  simp [CanonicalEnsemble.probability, probabilityBetaReal,
-        mathematicalPartitionFunction_of_fintype, mathematicalPartitionFunctionBetaReal, hT_beta]
+  have hden : 𝓒.mathematicalPartitionFunction T = 𝓒.mathematicalPartitionFunctionBetaReal b := by
+    rw [mathematicalPartitionFunction_of_fintype, mathematicalPartitionFunctionBetaReal]
+    refine Finset.sum_congr rfl ?_
+    intro j hj
+    simp [hT_beta']
+  have hprob :
+      rexp (-(T.toReal⁻¹ * kB⁻¹ * 𝓒.energy i)) / 𝓒.mathematicalPartitionFunction T
+        = rexp (-(b * 𝓒.energy i)) / 𝓒.mathematicalPartitionFunctionBetaReal b := by
+    calc
+      rexp (-(T.toReal⁻¹ * kB⁻¹ * 𝓒.energy i)) / 𝓒.mathematicalPartitionFunction T
+          = rexp (-(b * 𝓒.energy i)) / 𝓒.mathematicalPartitionFunction T := by
+              simp [hT_beta']
+      _ = rexp (-(b * 𝓒.energy i)) / 𝓒.mathematicalPartitionFunctionBetaReal b := by
+            rw [hden]
+  simpa [CanonicalEnsemble.probability, probabilityBetaReal] using
+    congrArg (fun p => 𝓒.energy i * p) hprob
 
 lemma differentiable_meanEnergyBetaReal
     [Nonempty ι] : Differentiable ℝ 𝓒.meanEnergyBetaReal := by
@@ -568,7 +596,7 @@ lemma derivWithin_meanEnergy_Beta_eq_neg_variance
     [MeasurableSingletonClass ι][𝓒.IsFinite] (T : Temperature) (hT_pos : 0 < T.val) :
     derivWithin 𝓒.meanEnergyBeta (Set.Ioi 0) (T.β : ℝ) = - 𝓒.energyVariance T := by
   let β₀ := (T.β : ℝ)
-  have hβ₀_pos : 0 < β₀ := beta_pos T hT_pos
+  have hβ₀_pos : 0 < β₀ := β_pos T hT_pos
   have h_eq_on : Set.EqOn 𝓒.meanEnergyBeta 𝓒.meanEnergyBetaReal (Set.Ioi 0) := by
     intro b hb; exact meanEnergy_Beta_eq_finite 𝓒 b hb
   rw [derivWithin_congr h_eq_on (h_eq_on hβ₀_pos)]
@@ -578,8 +606,11 @@ lemma derivWithin_meanEnergy_Beta_eq_neg_variance
   rw [deriv_meanEnergyBetaReal 𝓒 β₀]
   have h_U_eq : 𝓒.meanEnergyBetaReal β₀ = 𝓒.meanEnergy T := by
     rw [← meanEnergy_Beta_eq_finite 𝓒 β₀ hβ₀_pos]
-    simp [meanEnergyBeta]
-    simp_all only [NNReal.coe_pos, toNNReal_coe, ofβ_β, β₀]
+    change 𝓒.meanEnergy (Temperature.ofβ (Real.toNNReal β₀)) = 𝓒.meanEnergy T
+    have hβ₀_toNNReal : Real.toNNReal β₀ = T.β := by
+      change Real.toNNReal ((T.β : ℝ)) = T.β
+      simpa using (show Real.toNNReal ((T.β : ℝ)) = T.β from Real.toNNReal_coe)
+    rw [hβ₀_toNNReal, Temperature.ofβ_β]
   have h_prob_eq (i : ι) : 𝓒.probabilityBetaReal β₀ i = 𝓒.probability T i := by
     unfold probabilityBetaReal CanonicalEnsemble.probability
     congr 1
@@ -594,7 +625,7 @@ lemma derivWithin_meanEnergy_Beta_eq_neg_variance
 theorem fluctuation_dissipation_theorem_finite
     [MeasurableSingletonClass ι] [𝓒.IsFinite] (T : Temperature) (hT_pos : 0 < T.val) :
     𝓒.heatCapacity T = 𝓒.energyVariance T / (kB * (T.val : ℝ)^2) := by
-  have hβ₀_pos : 0 < (T.β : ℝ) := beta_pos T hT_pos
+  have hβ₀_pos : 0 < (T.β : ℝ) := β_pos T hT_pos
   let β₀ := (T.β : ℝ)
   have h_diff_U_beta : DifferentiableWithinAt ℝ 𝓒.meanEnergyBeta (Set.Ioi 0) β₀ := by
     have h_eq_on : Set.EqOn 𝓒.meanEnergyBeta 𝓒.meanEnergyBetaReal (Set.Ioi 0) := by
