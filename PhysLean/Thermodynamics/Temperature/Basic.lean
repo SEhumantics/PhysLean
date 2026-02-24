@@ -936,6 +936,10 @@ open scoped ENNReal
 
 Map a real number `t` to the inverse temperature `β` corresponding to
 the temperature `Real.toNNReal t` (`max t 0`), returned as a real number.
+
+Note:
+
+1. Why `ℝ` instead of `ℝ≥0`, if `β` is of type `ℝ≥0`?
 -/
 noncomputable def βFromReal (t : ℝ) : ℝ := ((Temperature.ofNNReal (Real.toNNReal t)).β)
 
