@@ -44,7 +44,9 @@ accessing the `val` field).
 -/
 instance : Coe Temperature ℝ≥0 := ⟨fun (T : Temperature) => T.val⟩
 
-/-- Convert a `Temperature` to a real number.
+/-- Function for `Temperature`:
+
+Convert a `Temperature` to a real number in `ℝ`.
 -/
 noncomputable def toReal (T : Temperature) : ℝ := NNReal.toReal T.val
 
@@ -131,7 +133,9 @@ lemma real_ge_zero (T : Temperature) : (T : ℝ) ≥ 0 := by
   -- `b ≥ a`. QED.
   exact zero_le_real T
 
-/-- Calculate the inverse temperature `β` corresponding to a given temperature `T`.
+/-- Function for `Temperature`:
+
+Calculate the inverse temperature `β` corresponding to a given temperature `T`.
 
 - Note:
 
@@ -200,7 +204,9 @@ lemma β_toReal (T : Temperature) : (β T : ℝ) = (1 :  ℝ) / (kB * (T : ℝ))
   rfl
 
 
-/-- Calculate the temperature associated with a given inverse temperature `β`.
+/-- Function for `Temperature`:
+
+Calculate the temperature associated with a given inverse temperature `β`.
 -/
 noncomputable def ofβ (β : ℝ≥0) : Temperature :=
   -- Given the formula `1 / (kB * β)`, we need to show that this is non-negative to fit the type
@@ -816,21 +822,54 @@ lemma tendsto_toReal_ofβ_atTop :
   -- Since `ofβ b` is defined as `1 / (kB * b)`, this directly implies the desired convergence. QED.
   exact tendsto_const_inv_mul_atTop kB kB_pos
 
-/-- As β → ∞, T = ofβ β → 0+ in ℝ (within Ioi 0). -/
-lemma tendsto_ofβ_atTop : Tendsto (fun b : ℝ≥0 => (Temperature.ofβ b : ℝ)) atTop (nhdsWithin 0 (Set.Ioi 0)) := by
-  have h_to0 := tendsto_toReal_ofβ_atTop
-  have h_into : Tendsto (fun b : ℝ≥0 => (Temperature.ofβ b : ℝ)) atTop (𝓟 (Set.Ioi (0 : ℝ))) :=
-    tendsto_principal.mpr (by simpa using Temperature.eventually_pos_ofβ)
-  have : Tendsto (fun b : ℝ≥0 => (Temperature.ofβ b : ℝ))
-      atTop ((nhds (0 : ℝ)) ⊓ 𝓟 (Set.Ioi (0 : ℝ))) :=
-    tendsto_inf.mpr ⟨h_to0, h_into⟩
-  simpa [nhdsWithin] using this
+/-- Lemma for `Temperature`:
+
+As the inverse temperature `β` tends to infinity,
+the real-valued representation of the temperature `ofβ β`
+tends to `0` from above (within the interval `(0, ∞)`).
+-/
+lemma tendsto_ofβ_atTop :
+    Tendsto (fun b : ℝ≥0 => (Temperature.ofβ b : ℝ))
+      atTop (nhdsWithin 0 (Set.Ioi 0)) := by
+  -- We derive `h_tendsto_nhds_zero` from
+  -- `tendsto_toReal_ofβ_atTop`, which states that as `β`
+  -- tends to infinity, the real-valued temperature
+  -- tends to `0` in the nhds sense.
+  have h_tendsto_nhds_zero := tendsto_toReal_ofβ_atTop
+  -- We derive `h_tendsto_principal_Ioi` which states that
+  -- as `β` tends to infinity, the real-valued temperature
+  -- eventually lies in the interval `(0, ∞)`, using
+  -- `tendsto_principal.mpr` and `eventually_pos_ofβ`.
+  have h_tendsto_principal_Ioi :
+      Tendsto (fun b : ℝ≥0 =>
+        (Temperature.ofβ b : ℝ))
+        atTop (𝓟 (Set.Ioi (0 : ℝ))) :=
+    tendsto_principal.mpr
+      (by simpa using Temperature.eventually_pos_ofβ)
+  -- We combine `h_tendsto_nhds_zero` and
+  -- `h_tendsto_principal_Ioi` using `tendsto_inf.mpr` to
+  -- conclude that the function tends to `0` within the
+  -- infimum filter `nhds 0 ⊓ 𝓟 (Set.Ioi 0)`.
+  have h_tendsto_inf :
+      Tendsto (fun b : ℝ≥0 =>
+        (Temperature.ofβ b : ℝ))
+        atTop
+        ((nhds (0 : ℝ)) ⊓ 𝓟 (Set.Ioi (0 : ℝ))) :=
+    tendsto_inf.mpr
+      ⟨h_tendsto_nhds_zero, h_tendsto_principal_Ioi⟩
+  -- Since `nhdsWithin 0 (Set.Ioi 0)` is defined as
+  -- `nhds 0 ⊓ 𝓟 (Set.Ioi 0)`, the conclusion follows
+  -- directly from `h_tendsto_inf` by simplification.
+  -- QED.
+  simpa [nhdsWithin] using h_tendsto_inf
 
 /-! ### Conversion to and from `ℝ≥0` -/
 
 open Constants
 
-/-- Simplification function: Build a temperature from a nonnegative real number.
+/-- Simplification function for `Temperature`:
+
+Build a temperature from a nonnegative real number.
 
 - Input:
   - `t` of type `ℝ≥0`: The nonnegative real number representing the temperature.
@@ -840,72 +879,52 @@ open Constants
 @[simp]
 def ofNNReal (t : ℝ≥0) : Temperature := ⟨t⟩
 
-/-- Simplification lemma: The `val` field of a temperature constructed from a nonnegative real number `t` is equal to `t`.
+/-- Simplification lemma for `Temperature`:
 
-- Premises:
-  - `t` of type `ℝ≥0`: The nonnegative real number used to construct the temperature.
-- Conclusion:
-  - The conclusion is `(ofNNReal t).val = t`: The `val` field of the temperature constructed from `t` is equal to `t`.
-- Proof:
-  - The proof is straightforward as it directly follows from the definition of `ofNNReal`.
-  - We use `rfl` (reflexivity of equality) to conclude that both sides are equal. QED.
+The `val` field of a temperature constructed from a nonnegative real number `t` is equal to `t`.
 -/
 @[simp]
 lemma ofNNReal_val (t : ℝ≥0) : (ofNNReal t).val = t := by
+  -- Both sides are definitionally equal by the definition of `ofNNReal`. QED.
   rfl
 
-/-- Simplification lemma: Coercing a temperature constructed from a nonnegative real number `t` back to `ℝ≥0` returns `t`.
+/-- Simplification lemma for `Temperature`:
 
-- Premises:
-  - `t` of type `ℝ≥0`: The nonnegative real number used to construct the temperature.
-- Conclusion:
-  - The conclusion is `((ofNNReal t : Temperature) : ℝ≥0) = t`: Coercing the temperature back to `ℝ≥0` returns the original `t`.
-- Proof:
-  - The proof is straightforward as it directly follows from the definition of `ofNNReal` and the coercion.
-  - We use `rfl` (reflexivity of equality) to conclude that both sides are equal. QED.
+Coercing a temperature constructed from a nonnegative real number `t` back to `ℝ≥0` returns `t`.
 -/
 @[simp]
 lemma coe_ofNNReal_coe (t : ℝ≥0) : ((ofNNReal t : Temperature) : ℝ≥0) = t := by
+  -- Both sides are definitionally equal by the definition of `ofNNReal` and the coercion. QED.
   rfl
 
-/-- Simplification lemma: Coercing a temperature constructed from a nonnegative real number `t` to `ℝ` returns `t`.
+/-- Simplification lemma for `Temperature`:
 
-- Premises:
-  - `t` of type `ℝ≥0`: The nonnegative real number used to construct the temperature.
-- Conclusion:
-  - The conclusion is `((ofNNReal t : Temperature) : ℝ) = t`: Coercing the temperature to `ℝ` returns the original `t`.
-- Proof:
-  - The proof is straightforward as it directly follows from the definition of `ofNNReal` and the coercion.
-  - We use `rfl` (reflexivity of equality) to conclude that both sides are equal. QED.
+Coercing a temperature constructed from a nonnegative real number `t` to `ℝ` returns `t`.
 -/
 @[simp]
 lemma coe_ofNNReal_real (t : ℝ≥0) : ((⟨t⟩ : Temperature) : ℝ) = t := by
+  -- Both sides are definitionally equal by the definition of `ofNNReal` and the coercion. QED.
   rfl
 
-/-- Simplification function: Build a temperature from a real number, given a proof that it is nonnegative.
+/-- Simplification function for `Temperature`:
 
-- Input:
-  - `t` of type `ℝ`: The real number representing the temperature.
-  - `h_zero_le_t` of type `0 ≤ t`: A proof that the real number is nonnegative.
-- Output:
-  - Result of type `Temperature`: The temperature constructed from the real number `t`.
+Build a temperature from a real number, given a proof that it is nonnegative.
 -/
 @[simp]
-noncomputable def ofRealNonneg (t : ℝ) (h_zero_le_t : 0 ≤ t) : Temperature := ofNNReal ⟨t, h_zero_le_t⟩
+noncomputable def ofRealNonneg (t : ℝ) (h_zero_le_t : 0 ≤ t) : Temperature := by
+  -- Apply `ofNNReal` to the nonnegative real number `t` to construct the temperature,
+  -- using the fact that `t` can be coerced to `ℝ≥0` since it is nonnegative.
+  exact ofNNReal ⟨t, h_zero_le_t⟩
 
-/-- Simplification lemma: The `val` field of a temperature constructed from a nonnegative real number `t` is equal to `⟨t, h_zero_le_t⟩`.
+/-- Simplification lemma for `Temperature`:
 
-- Premises:
-  - `t` of type `ℝ` (implicit): The real number used to construct the temperature.
-  - `h_zero_le_t` of type `0 ≤ t`: A proof that the real number is nonnegative.
-- Conclusion:
-  - The conclusion is `(ofRealNonneg t h_zero_le_t).val = ⟨t, h_zero_le_t⟩`: The `val` field of the temperature constructed from `t` is equal to `⟨t, h_zero_le_t⟩`.
-- Proof:
-  - The proof is straightforward as it directly follows from the definition of `ofRealNonneg`.
-  - We use `rfl` (reflexivity of equality) to conclude that both sides are equal. QED.
+The `val` field of a temperature constructed from a nonnegative real number `t`
+is equal to `⟨t, h_zero_le_t⟩`.
 -/
 @[simp]
-lemma ofRealNonneg_val {t : ℝ} (h_zero_le_t : 0 ≤ t) : (ofRealNonneg t h_zero_le_t).val = ⟨t, h_zero_le_t⟩ := by
+lemma ofRealNonneg_val {t : ℝ} (h_zero_le_t : 0 ≤ t) :
+    (ofRealNonneg t h_zero_le_t).val = ⟨t, h_zero_le_t⟩ := by
+  -- Both sides are definitionally equal by the definition of `ofRealNonneg`. QED.
   rfl
 
 /-! ### Calculus relating T and β -/
@@ -913,47 +932,104 @@ lemma ofRealNonneg_val {t : ℝ} (h_zero_le_t : 0 ≤ t) : (ofRealNonneg t h_zer
 open Set
 open scoped ENNReal
 
-/-- Map a real `t` to the inverse temperature `β` corresponding to the temperature `Real.toNNReal t`
-(`max t 0`), returned as a real number. -/
-noncomputable def βFromReal (t : ℝ) : ℝ :=
-  ((Temperature.ofNNReal (Real.toNNReal t)).β : ℝ)
+/-- Function for `Temperature`:
 
-/-- Explicit closed-form for `β_fun_T t` when `t > 0`. -/
-lemma β_fun_T_formula (t : ℝ) (ht : 0 < t) :
+Map a real number `t` to the inverse temperature `β` corresponding to
+the temperature `Real.toNNReal t` (`max t 0`), returned as a real number.
+-/
+noncomputable def βFromReal (t : ℝ) : ℝ := ((Temperature.ofNNReal (Real.toNNReal t)).β)
+
+/-- Lemma for `Temperature`:
+
+Explicit closed-form for `βFromReal t` when `t > 0`: `βFromReal t = 1 / (kB * t)`.
+-/
+lemma β_fun_T_formula (t : ℝ) (h_t_pos : 0 < t) :
     βFromReal t = (1 :  ℝ) / (kB * t) := by
-  have ht0 : (0 : ℝ) ≤ t := ht.le
-  have : ((Temperature.ofNNReal (Real.toNNReal t)).β : ℝ) = (1 :  ℝ) / (kB * t) := by
+  -- We derive `h_t_nonneg : 0 ≤ t` from `h_t_pos` by weakening strict
+  -- inequality to non-strict inequality.
+  have h_t_nonneg : (0 : ℝ) ≤ t := h_t_pos.le
+  -- We derive `h_beta_formula` which states that the explicit formula
+  -- for `β` applied to `Real.toNNReal t` equals `1 / (kB * t)`,
+  -- by simplifying using the definitions of `β`, `ofNNReal`, `toReal`,
+  -- and the fact that `Real.toNNReal t = t` when `t ≥ 0`.
+  have h_beta_formula :
+      ((Temperature.ofNNReal (Real.toNNReal t)).β : ℝ) = (1 :  ℝ) / (kB * t) := by
     simp [Temperature.β, Temperature.ofNNReal, Temperature.toReal,
-      Real.toNNReal_of_nonneg ht0, one_div, mul_comm]
-  simpa [βFromReal] using this
+          Real.toNNReal_of_nonneg h_t_nonneg, one_div, mul_comm]
+  -- We conclude by simplifying the definition of `βFromReal` and
+  -- applying `h_beta_formula`. QED.
+  simpa [βFromReal] using h_beta_formula
 
-/-- On `Ioi 0`, `β_fun_T t` equals `1 / (kB * t)`. -/
-lemma β_fun_T_eq_on_Ioi :
-    EqOn βFromReal (fun t : ℝ => (1 :  ℝ) / (kB * t)) (Set.Ioi 0) := by
-  intro t ht
-  exact β_fun_T_formula t ht
+/-- Lemma for `Temperature`:
 
-lemma deriv_β_wrt_T (T : Temperature) (hT_pos : 0 < T.val) :
-    HasDerivWithinAt βFromReal (-1 / (kB * (T.val : ℝ)^2)) (Set.Ioi 0) (T.val : ℝ) := by
+On the interval `(0, ∞)`, `βFromReal t` equals `1 / (kB * t)`.
+-/
+lemma β_fun_T_eq_on_Ioi : EqOn βFromReal (fun t : ℝ => (1 :  ℝ) / (kB * t)) (Set.Ioi 0) := by
+  -- We introduce `t : ℝ` and the hypothesis
+  -- `h_t_pos : t ∈ Set.Ioi 0` (i.e. `0 < t`) from the goal.
+  intro t h_t_pos
+  -- We simplify `h_t_pos` to extract the inequality `0 < t`.
+  simp at h_t_pos
+  -- We apply `β_fun_T_formula t h_t_pos` to conclude that
+  -- `βFromReal t = 1 / (kB * t)`. QED.
+  exact β_fun_T_formula t h_t_pos
+
+/-- Lemma for `Temperature`:
+
+The function `βFromReal` has derivative `-1 / (kB * T²)` within the
+interval `(0, ∞)` at the point `T.val`, when `T` is strictly positive.
+-/
+lemma deriv_β_wrt_T (T : Temperature) (h_T_pos : 0 < T.val) : HasDerivWithinAt βFromReal
+    (-1 / (kB * (T.val : ℝ)^2)) (Set.Ioi 0) (T.val : ℝ) := by
+  -- We define `f : ℝ → ℝ` as the explicit formula
+  -- `f t = 1 / (kB * t)`, which is the closed form of
+  -- `βFromReal` on `(0, ∞)`.
   let f : ℝ → ℝ := fun t => (1 :  ℝ) / (kB * t)
-  have h_eq : EqOn βFromReal f (Set.Ioi 0) := β_fun_T_eq_on_Ioi
-  have hTne : (T.val : ℝ) ≠ 0 := ne_of_gt hT_pos
-  have hf_def : f = fun t : ℝ => (kB)⁻¹ * t⁻¹ := by
+  -- We derive `h_eq_on : EqOn βFromReal f (Set.Ioi 0)`
+  -- using `β_fun_T_eq_on_Ioi`, which states that
+  -- `βFromReal` and `f` agree on `(0, ∞)`.
+  have h_eq_on : EqOn βFromReal f (Set.Ioi 0) :=
+    β_fun_T_eq_on_Ioi
+  -- We derive `h_T_ne_zero : (T.val : ℝ) ≠ 0` from
+  -- `h_T_pos` using `ne_of_gt`, since a strictly positive
+  -- number is nonzero.
+  have h_T_ne_zero : (T.val : ℝ) ≠ 0 :=
+    ne_of_gt h_T_pos
+  -- We derive `h_f_def` which rewrites `f` in terms of
+  -- inverses: `f = fun t => kB⁻¹ * t⁻¹`, by case-splitting
+  -- on whether `t = 0` and simplifying.
+  have h_f_def :
+      f = fun t : ℝ => (kB)⁻¹ * t⁻¹ := by
     funext t
-    by_cases ht : t = 0
-    · simp [f, ht]
+    -- We case-split on whether `t = 0`.
+    by_cases h_t_eq_zero : t = 0
+    -- If `t = 0`, both sides simplify to `0`.
+    · simp [f, h_t_eq_zero]
+    -- If `t ≠ 0`, we simplify and apply `ring`. QED.
     · simp [f, one_div, *] at *
       ring
+  -- We derive `h_inv` which states that the derivative of
+  -- `t⁻¹` at `T.val` is `-(T.val²)⁻¹`, using
+  -- `hasDerivAt_inv` with `h_T_ne_zero`.
   have h_inv :
       HasDerivAt (fun t : ℝ => t⁻¹)
         (-((T.val : ℝ) ^ 2)⁻¹) (T.val : ℝ) := by
-    simpa using (hasDerivAt_inv (x := (T.val : ℝ)) hTne)
+    simpa using
+      (hasDerivAt_inv (x := (T.val : ℝ)) h_T_ne_zero)
+  -- We derive `h_deriv_aux` which states the derivative of
+  -- `kB⁻¹ * t⁻¹` at `T.val` is `kB⁻¹ * (-(T.val²)⁻¹)`,
+  -- by applying the constant-multiple rule to `h_inv`.
   have h_deriv_aux :
       HasDerivAt (fun t : ℝ => (kB)⁻¹ * t⁻¹)
-        ((kB)⁻¹ * (-((T.val : ℝ) ^ 2)⁻¹)) (T.val : ℝ) :=
+        ((kB)⁻¹ * (-((T.val : ℝ) ^ 2)⁻¹))
+        (T.val : ℝ) :=
     h_inv.const_mul ((kB)⁻¹)
+  -- We derive `h_pow_simp` which simplifies the derivative
+  -- expression `kB⁻¹ * (-(T.val²)⁻¹)` to the target form
+  -- `-1 / (kB * T.val²)`, using algebraic manipulations.
   have h_pow_simp :
-      (kB)⁻¹ * (-((T.val : ℝ) ^ 2)⁻¹) = -1 / (kB * (T.val : ℝ)^2) := by
+      (kB)⁻¹ * (-((T.val : ℝ) ^ 2)⁻¹) =
+        -1 / (kB * (T.val : ℝ)^2) := by
     calc
       (kB)⁻¹ * (-((T.val : ℝ) ^ 2)⁻¹)
           = -((kB)⁻¹ * ((T.val : ℝ) ^ 2)⁻¹) := by
@@ -962,34 +1038,100 @@ lemma deriv_β_wrt_T (T : Temperature) (hT_pos : 0 < T.val) :
             simp [one_div]
       _ = -1 / (kB * (T.val : ℝ) ^ 2) := by
         rw [one_div]
-        field_simp [pow_two, mul_comm, mul_left_comm, mul_assoc, kB_ne_zero, hTne]
+        field_simp [pow_two, mul_comm,
+          mul_left_comm, mul_assoc,
+          kB_ne_zero, h_T_ne_zero]
+  -- We derive `h_deriv_f` which states that `f` has
+  -- derivative `-1 / (kB * T.val²)` at `T.val`, by
+  -- combining `h_f_def`, `h_pow_simp`, and `h_deriv_aux`.
   have h_deriv_f :
-      HasDerivAt f (-1 / (kB * (T.val : ℝ)^2)) (T.val : ℝ) := by
-    simpa [hf_def, h_pow_simp] using h_deriv_aux
-  have h_mem : (T.val : ℝ) ∈ Set.Ioi (0 : ℝ) := hT_pos
-  exact (h_deriv_f.hasDerivWithinAt).congr h_eq (h_eq h_mem)
+      HasDerivAt f
+        (-1 / (kB * (T.val : ℝ)^2))
+        (T.val : ℝ) := by
+    simpa [h_f_def, h_pow_simp] using h_deriv_aux
+  -- We derive `h_mem : (T.val : ℝ) ∈ Set.Ioi 0` from
+  -- `h_T_pos`, confirming that the evaluation point lies
+  -- in the domain.
+  have h_mem : (T.val : ℝ) ∈ Set.Ioi (0 : ℝ) :=
+    h_T_pos
+  -- We conclude by converting `h_deriv_f` to a
+  -- `HasDerivWithinAt` and applying `congr` with `h_eq_on`
+  -- to replace `f` by `βFromReal` on the set. QED.
+  exact (h_deriv_f.hasDerivWithinAt).congr
+    h_eq_on (h_eq_on h_mem)
 
-/-- Chain rule for β(T) : d/dT F(β(T)) = F'(β(T)) * (-1 / (kB * T^2)), within `Ioi 0`. -/
+/-- Lemma for `Temperature`:
+
+Chain rule for `β(T)`: if `F` has derivative `F'` at `β(T)` within
+`(0, ∞)`, then the composition `t ↦ F(βFromReal(t))` has derivative
+`F' * (-1 / (kB * T²))` within `(0, ∞)` at `T.val`.
+-/
 lemma chain_rule_T_β {F : ℝ → ℝ} {F' : ℝ}
-    (T : Temperature) (hT_pos : 0 < T.val)
-    (hF_deriv : HasDerivWithinAt F F' (Set.Ioi 0) (T.β : ℝ)) :
+    (T : Temperature) (h_T_pos : 0 < T.val)
+    (h_F_deriv : HasDerivWithinAt F F' (Set.Ioi 0) (T.β : ℝ)) :
     HasDerivWithinAt (fun t : ℝ => F (βFromReal t))
-      (F' * (-1 / (kB * (T.val : ℝ)^2))) (Set.Ioi 0) (T.val : ℝ) := by
-  have hβ_deriv := deriv_β_wrt_T (T:=T) hT_pos
-  have h_map : Set.MapsTo βFromReal (Set.Ioi 0) (Set.Ioi 0) := by
-    intro t ht
-    have ht_pos : 0 < t := ht
-    have : 0 < (1 :  ℝ) / (kB * t) := by
-      have : 0 < kB * t := mul_pos kB_pos ht_pos
-      exact one_div_pos.mpr this
-    have h_eqt : βFromReal t = (1 :  ℝ) / (kB * t) := β_fun_T_eq_on_Ioi ht
-    simpa [h_eqt] using this
-  have h_β_at_T : βFromReal (T.val : ℝ) = (T.β : ℝ) := by
-    have hTposR : 0 < (T.val : ℝ) := hT_pos
-    have h_eqt := β_fun_T_eq_on_Ioi hTposR
-    simpa [Temperature.β, Temperature.toReal] using h_eqt
-  have hF_deriv' : HasDerivWithinAt F F' (Set.Ioi 0) (βFromReal (T.val : ℝ)) := by
-    simpa [h_β_at_T] using hF_deriv
-  have h_comp := hF_deriv'.comp (T.val : ℝ) hβ_deriv h_map
-  simpa [mul_comm] using h_comp
+    (F' * (-1 / (kB * (T.val : ℝ)^2)))
+    (Set.Ioi 0) (T.val : ℝ) := by
+  -- We derive `h_β_deriv` from `deriv_β_wrt_T`, which
+  -- gives the derivative of `βFromReal` at `T.val`.
+  have h_β_deriv :=
+    deriv_β_wrt_T (T := T) h_T_pos
+  -- We derive `h_maps_to` which states that `βFromReal`
+  -- maps `(0, ∞)` into `(0, ∞)`, i.e. positive inputs
+  -- produce positive outputs.
+  have h_maps_to :
+      Set.MapsTo βFromReal (Set.Ioi 0) (Set.Ioi 0) := by
+    -- We introduce `t : ℝ` and the hypothesis
+    -- `h_t_pos : t ∈ Set.Ioi 0` (i.e. `0 < t`).
+    intro t h_t_pos
+    -- We derive `h_kB_mul_t_pos : 0 < kB * t` using
+    -- `mul_pos kB_pos h_t_pos`.
+    have h_kB_mul_t_pos : 0 < kB * t :=
+      mul_pos kB_pos h_t_pos
+    -- We derive `h_quotient_pos : 0 < 1 / (kB * t)` using
+    -- `one_div_pos.mpr h_kB_mul_t_pos`.
+    have h_quotient_pos : 0 < (1 :  ℝ) / (kB * t) :=
+      one_div_pos.mpr h_kB_mul_t_pos
+    -- We derive `h_βFromReal_eq` which states that
+    -- `βFromReal t = 1 / (kB * t)` on `(0, ∞)`.
+    have h_βFromReal_eq :
+        βFromReal t = (1 :  ℝ) / (kB * t) :=
+      β_fun_T_eq_on_Ioi h_t_pos
+    -- We conclude by rewriting `βFromReal t` with
+    -- `h_βFromReal_eq` and applying `h_quotient_pos`. QED.
+    simpa [h_βFromReal_eq] using h_quotient_pos
+  -- We derive `h_β_at_T` which states that
+  -- `βFromReal (T.val : ℝ) = (T.β : ℝ)`, i.e. the
+  -- explicit formula agrees with the definition of `β`.
+  have h_β_at_T :
+      βFromReal (T.val : ℝ) = (T.β : ℝ) := by
+    -- We derive `h_T_pos_real : 0 < (T.val : ℝ)` from
+    -- `h_T_pos`.
+    have h_T_pos_real : 0 < (T.val : ℝ) := h_T_pos
+    -- We derive `h_βFromReal_eq_at_T` from
+    -- `β_fun_T_eq_on_Ioi h_T_pos_real`.
+    have h_βFromReal_eq_at_T :=
+      β_fun_T_eq_on_Ioi h_T_pos_real
+    -- We conclude by simplifying with the definitions of
+    -- `β` and `toReal`. QED.
+    simpa [Temperature.β, Temperature.toReal]
+      using h_βFromReal_eq_at_T
+  -- We derive `h_F_deriv_at_βFromReal` which rewrites
+  -- `h_F_deriv` to use `βFromReal (T.val)` instead of
+  -- `(T.β : ℝ)`, using `h_β_at_T`.
+  have h_F_deriv_at_βFromReal :
+      HasDerivWithinAt F F'
+        (Set.Ioi 0) (βFromReal (T.val : ℝ)) := by
+    simpa [h_β_at_T] using h_F_deriv
+  -- We derive `h_composition` by applying the chain rule
+  -- (`HasDerivWithinAt.comp`) to compose `F` with
+  -- `βFromReal`, using `h_F_deriv_at_βFromReal`,
+  -- `h_β_deriv`, and `h_maps_to`.
+  have h_composition :=
+    h_F_deriv_at_βFromReal.comp
+      (T.val : ℝ) h_β_deriv h_maps_to
+  -- We conclude by simplifying `h_composition` with
+  -- `mul_comm` to match the target derivative expression.
+  -- QED.
+  simpa [mul_comm] using h_composition
 end Temperature
