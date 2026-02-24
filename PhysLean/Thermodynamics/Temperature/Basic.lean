@@ -791,7 +791,7 @@ private lemma tendsto_const_inv_mul_atTop_eventually_dist_lt (a : ℝ) (h_a_pos 
 /-- Helper lemma for `Temperature`:
 
 As `b` tends to infinity, the function value `1 / (a * b)` tends to `0`
-in the sense ofthe metric space distance.
+in the sense of the metric space distance.
 -/
 private lemma tendsto_const_inv_mul_atTop (a : ℝ) (h_a_pos : 0 < a) :
     Tendsto (fun b : ℝ≥0 => (1 : ℝ) / (a * (b : ℝ))) atTop (𝓝 (0 : ℝ)) := by
