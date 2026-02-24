@@ -60,7 +60,7 @@ private lemma ofβ_real_nonneg (b : ℝ≥0) : 0 ≤ (1 : ℝ) / (kB * (b : ℝ)
 
 /-- Helper lemma for `Temperature`:
 
-Continuity at a positive point for the real formula `(t : ℝ) ↦ (1 :  ℝ) / (kB * t)`.
+Continuity at a positive point for the real formula `(t : ℝ) ↦ (1 : ℝ) / (kB * t)`.
 -/
 private lemma ofβ_realExpr_continuousAt_real (x : ℝ≥0) (h_x_pos : 0 < x) :
     ContinuousAt (fun (t : ℝ) => (1 : ℝ) / (kB * t)) (x : ℝ) := by
@@ -92,9 +92,9 @@ private lemma ofβ_realExpr_continuousAt_nnreal (x : ℝ≥0) (h_x_pos : 0 < x) 
   -- We define `f : ℝ≥0 → ℝ` as `f (b : ℝ≥0) := (1 : ℝ) / (kB * b)`.
   -- This is the same as the function in the goal, but we give it a name for clarity.
   let f : ℝ≥0 → ℝ := fun (b : ℝ≥0) => (1 : ℝ) / (kB * b)
-  -- We define `g : ℝ → ℝ` as `g (t : ℝ) := (1 :  ℝ) / (kB * t)`.
+  -- We define `g : ℝ → ℝ` as `g (t : ℝ) := (1 : ℝ) / (kB * t)`.
   -- This is the same formula as `f`, but defined on `ℝ`.
-  let g : ℝ → ℝ := fun (t : ℝ) => (1 :  ℝ) / (kB * t)
+  let g : ℝ → ℝ := fun (t : ℝ) => (1 : ℝ) / (kB * t)
   -- We define `h : ℝ≥0 → ℝ` as `h (b : ℝ≥0) := (b : ℝ)`.
   -- This is the coercion from `ℝ≥0` to `ℝ`.
   let h : ℝ≥0 → ℝ := fun (b : ℝ≥0) => (b : ℝ)
@@ -201,7 +201,7 @@ lemma ofβ_differentiableOn :
   -- We refine the goal using `DifferentiableOn.congr`, which allows us to prove differentiability
   -- by showing that the function is equal to a simpler function that we can easily differentiate.
   -- We now have two cases:
-  refine DifferentiableOn.congr (f := fun (x : ℝ) => (1 :  ℝ) / (kB * x)) ?_ ?_
+  refine DifferentiableOn.congr (f := fun (x : ℝ) => (1 : ℝ) / (kB * x)) ?_ ?_
   -- `case refine_1` : The goal is `⊢ DifferentiableOn ℝ (fun x => 1 / (kB * x)) (Set.Ioi 0)`.
   -- We further refine this using `DifferentiableOn.fun_div`, which requires us
   -- to prove differentiability of the numerator and denominator separately,

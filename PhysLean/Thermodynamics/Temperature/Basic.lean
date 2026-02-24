@@ -184,7 +184,7 @@ The definition of `β T` unfolds to its explicit formula in terms of `kB` and `T
 -/
 @[simp]
 lemma β_eq (T : Temperature) : β T =
-  ⟨1 / (kB * (T : ℝ)), by
+    ⟨1 / (kB * (T : ℝ)), by
       apply div_nonneg
       · exact zero_le_one
       · apply mul_nonneg
@@ -199,7 +199,7 @@ lemma β_eq (T : Temperature) : β T =
 Coercing `β T` from `ℝ≥0` to `ℝ` gives the explicit formula `1 / (kB * (T : ℝ))`.
 -/
 @[simp]
-lemma β_toReal (T : Temperature) : (β T : ℝ) = (1 :  ℝ) / (kB * (T : ℝ)) := by
+lemma β_toReal (T : Temperature) : (β T : ℝ) = (1 : ℝ) / (kB * (T : ℝ)) := by
   -- We rewrite the goal using the definition of `β` from the previous lemma `β_eq`, which gives us
   -- `⊢ ↑⟨1 / (kB * T.toReal), ⋯⟩ = 1 / (kB * T.toReal)`, where `↑` denotes the coercion from `ℝ≥0`
   -- to `ℝ`, and `⋯` represents the proof of non-negativity that we can ignore since it does not
@@ -210,7 +210,6 @@ lemma β_toReal (T : Temperature) : (β T : ℝ) = (1 :  ℝ) / (kB * (T : ℝ))
   -- sides are definitionally equal, and we can conclude that they are equal by reflexivity of
   -- equality (`rfl`). QED.
   rfl
-
 
 /-- Function for `Temperature`:
 

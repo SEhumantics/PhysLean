@@ -140,7 +140,6 @@ private lemma tendsto_const_inv_mul_at_bound_lt_epsilon (a ε : ℝ) (h_a_pos : 
   -- Finally, we conclude that `⊢ 0 < a * ε` is true by `h_product_pos`. QED.
   exact h_product_pos
 
-
 /-- Helper lemma for `Temperature`:
 
 Conversion from nonnegative inequality to metric space distance.

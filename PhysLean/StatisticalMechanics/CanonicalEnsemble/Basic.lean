@@ -370,7 +370,8 @@ lemma μBolt_ne_zero_of_μ_ne_zero (T : Temperature) (h : 𝓒.μ ≠ 0) :
   simp [μBolt] at ⊢ h
   rw [Measure.ext_iff'] at ⊢ h
   simp only [Measure.coe_zero, Pi.zero_apply]
-  have hs : {x | ENNReal.ofReal (rexp (-(T.toReal⁻¹ * Constants.kB⁻¹ * 𝓒.energy x))) ≠ 0} = Set.univ := by
+  have hs : {x | ENNReal.ofReal
+                (rexp (-(T.toReal⁻¹ * Constants.kB⁻¹ * 𝓒.energy x))) ≠ 0} = Set.univ := by
     ext i
     simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le, Set.mem_setOf_eq, Set.mem_univ, iff_true]
     exact exp_pos _

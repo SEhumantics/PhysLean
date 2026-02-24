@@ -44,7 +44,7 @@ noncomputable def βFromReal (t : ℝ) : ℝ := ((Temperature.ofNNReal (Real.toN
 Explicit closed-form for `βFromReal t` when `t > 0`: `βFromReal t = 1 / (kB * t)`.
 -/
 lemma β_fun_T_formula (t : ℝ) (h_t_pos : 0 < t) :
-    βFromReal t = (1 :  ℝ) / (kB * t) := by
+    βFromReal t = (1 : ℝ) / (kB * t) := by
   -- We derive `h_t_nonneg : 0 ≤ t` from `h_t_pos` by weakening strict
   -- inequality to non-strict inequality.
   have h_t_nonneg : (0 : ℝ) ≤ t := h_t_pos.le
@@ -53,7 +53,7 @@ lemma β_fun_T_formula (t : ℝ) (h_t_pos : 0 < t) :
   -- by simplifying using the definitions of `β`, `ofNNReal`, `toReal`,
   -- and the fact that `Real.toNNReal t = t` when `t ≥ 0`.
   have h_beta_formula :
-      ((Temperature.ofNNReal (Real.toNNReal t)).β : ℝ) = (1 :  ℝ) / (kB * t) := by
+      ((Temperature.ofNNReal (Real.toNNReal t)).β : ℝ) = (1 : ℝ) / (kB * t) := by
     simp [Temperature.β, Temperature.ofNNReal, Temperature.toReal,
           Real.toNNReal_of_nonneg h_t_nonneg, one_div, mul_comm]
   -- We conclude by simplifying the definition of `βFromReal` and
@@ -64,7 +64,7 @@ lemma β_fun_T_formula (t : ℝ) (h_t_pos : 0 < t) :
 
 On the interval `(0, ∞)`, `βFromReal t` equals `1 / (kB * t)`.
 -/
-lemma β_fun_T_eq_on_Ioi : EqOn βFromReal (fun t : ℝ => (1 :  ℝ) / (kB * t)) (Set.Ioi 0) := by
+lemma β_fun_T_eq_on_Ioi : EqOn βFromReal (fun t : ℝ => (1 : ℝ) / (kB * t)) (Set.Ioi 0) := by
   -- We introduce `t : ℝ` and the hypothesis
   -- `h_t_pos : t ∈ Set.Ioi 0` (i.e. `0 < t`) from the goal.
   intro t h_t_pos
@@ -84,7 +84,7 @@ lemma deriv_β_wrt_T (T : Temperature) (h_T_pos : 0 < T.val) : HasDerivWithinAt 
   -- We define `f : ℝ → ℝ` as the explicit formula
   -- `f t = 1 / (kB * t)`, which is the closed form of
   -- `βFromReal` on `(0, ∞)`.
-  let f : ℝ → ℝ := fun t => (1 :  ℝ) / (kB * t)
+  let f : ℝ → ℝ := fun t => (1 : ℝ) / (kB * t)
   -- We derive `h_eq_on : EqOn βFromReal f (Set.Ioi 0)`
   -- using `β_fun_T_eq_on_Ioi`, which states that
   -- `βFromReal` and `f` agree on `(0, ∞)`.
@@ -190,12 +190,12 @@ lemma chain_rule_T_β {F : ℝ → ℝ} {F' : ℝ}
       mul_pos kB_pos h_t_pos
     -- We derive `h_quotient_pos : 0 < 1 / (kB * t)` using
     -- `one_div_pos.mpr h_kB_mul_t_pos`.
-    have h_quotient_pos : 0 < (1 :  ℝ) / (kB * t) :=
+    have h_quotient_pos : 0 < (1 : ℝ) / (kB * t) :=
       one_div_pos.mpr h_kB_mul_t_pos
     -- We derive `h_βFromReal_eq` which states that
     -- `βFromReal t = 1 / (kB * t)` on `(0, ∞)`.
     have h_βFromReal_eq :
-        βFromReal t = (1 :  ℝ) / (kB * t) :=
+        βFromReal t = (1 : ℝ) / (kB * t) :=
       β_fun_T_eq_on_Ioi h_t_pos
     -- We conclude by rewriting `βFromReal t` with
     -- `h_βFromReal_eq` and applying `h_quotient_pos`. QED.
