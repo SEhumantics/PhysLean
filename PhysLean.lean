@@ -383,6 +383,9 @@ import PhysLean.StringTheory.FTheory.SU5.Quanta.TenQuanta
 import PhysLean.Thermodynamics.Basic
 import PhysLean.Thermodynamics.IdealGas.Basic
 import PhysLean.Thermodynamics.Temperature.Basic
+import PhysLean.Thermodynamics.Temperature.Calculus
+import PhysLean.Thermodynamics.Temperature.Convergence
+import PhysLean.Thermodynamics.Temperature.Regularity
 import PhysLean.Thermodynamics.Temperature.TemperatureUnits
 import PhysLean.Units.Basic
 import PhysLean.Units.Dimension
