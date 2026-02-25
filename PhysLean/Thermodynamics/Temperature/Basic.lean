@@ -29,7 +29,6 @@ For calculus relating T and β, see
 open NNReal
 
 /-- The type `Temperature` represents absolute thermodynamic temperature in kelvin.
-  - `val` of type `ℝ≥0`: The nonnegative real value of the temperature.
 -/
 structure Temperature where
   /-- The nonnegative real value of the temperature. -/
@@ -149,13 +148,6 @@ Calculate the inverse temperature `β` corresponding to a given temperature `T`.
 
 1. This has dimensions equivalent to `Energy` to the power `-1`. Refer to the concept of
 "thermodynamic beta" in thermodynamics for more details.
-
-2. Currently this formula allows for "non-negative" temperatures, which includes absolute zero in
-the denominator. In physical terms, absolute zero is a limit that cannot be reached, and the formula
-for `β` is not well-defined at `T = 0`. Therefore, while the type `Temperature` allows for `T = 0`,
-we should refactor this definition in the future to exclude absolute zero, either by refining the
-domain or by defining `β` as a partial function that is only defined for strictly positive
-temperatures.
 -/
 noncomputable def β (T : Temperature) : ℝ≥0 :=
   -- Given the formula `(1 / (kB * (T : ℝ))) : ℝ≥0`, we need to show that this is non-negative to
