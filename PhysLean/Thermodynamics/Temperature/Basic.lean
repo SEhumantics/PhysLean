@@ -598,4 +598,12 @@ lemma ofβ_β (T : PositiveTemperature) : ofβ (β T) = T := by
   -- After clearing denominators, both sides reduce to the same expression. QED.
   field_simp [kB_ne_zero]
 
+/-- The thermodynamic equivalence between positive temperature and positive inverse temperature.
+-/
+noncomputable def equiv_β : PositiveTemperature ≃ ℝ>0 where
+  toFun := β
+  invFun := ofβ
+  left_inv := ofβ_β
+  right_inv := β_ofβ
+
 end PositiveTemperature
