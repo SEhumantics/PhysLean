@@ -5,6 +5,7 @@ Authors: Trong-Nghia Be, Matteo Cipollina, Tan-Phuoc-Hung Le, Joseph Tooby-Smith
 -/
 import Mathlib.Analysis.InnerProductSpace.Basic
 import PhysLean.StatisticalMechanics.BoltzmannConstant
+import PhysLean.Meta.Types.PosReal
 
 /-!
 # Temperature
@@ -407,6 +408,14 @@ Defined as a function that takes a `PositiveTemperature` and returns the underly
 -/
 instance : Coe PositiveTemperature ℝ≥0 := ⟨fun (T : PositiveTemperature) => T.1.val⟩
 
+/-- Type coercion (implicit casting) from `PositiveTemperature` to `ℝ>0`.
+
+Defined as a function that takes a `PositiveTemperature` and returns the underlying `ℝ>0` value,
+which is the `val` field of the underlying `Temperature` along with the proof that
+it is strictly positive.
+-/
+instance : Coe PositiveTemperature ℝ>0 := ⟨fun (T : PositiveTemperature) => ⟨T.1.val, T.2⟩⟩
+
 /-- Function for `PositiveTemperature`:
 
 Convert a `PositiveTemperature` to a real number in `ℝ`.
@@ -464,12 +473,8 @@ Calculate the inverse temperature `β` corresponding to a given positive tempera
 
 1. This has dimensions equivalent to `Energy` to the power `-1`. Refer to the concept of
 "thermodynamic beta" in thermodynamics for more details.
-
-2. The function has the type signature `PositiveTemperature → { β : ℝ // 0 < β }`,
-which means it takes a `PositiveTemperature` as input and returns a subtype of `ℝ` consisting of
-real numbers `β` that are strictly positive.
 -/
-noncomputable def β (T : PositiveTemperature) : { β : ℝ // 0 < β } :=
+noncomputable def β (T : PositiveTemperature) : ℝ>0 :=
   ⟨1 / (kB * (T : ℝ)), by
     -- We need to show that `1 / (kB * (T : ℝ))` is strictly positive, by applying `div_pos`.
     apply div_pos
@@ -524,7 +529,7 @@ lemma β_pos (T : PositiveTemperature) : 0 < (T.β : ℝ) := by
 
 Construct a `PositiveTemperature` from a positive inverse temperature `β`.
 -/
-noncomputable def ofβ (β : ℝ≥0) (h_β_pos : 0 < (β : ℝ)) : PositiveTemperature :=
+noncomputable def ofβ (β : ℝ>0): PositiveTemperature :=
   ⟨⟨⟨1 / (kB * β), by
     -- We need to show that `1 / (kB * β)` is nonnegative, by applying `div_nonneg`.
     apply div_nonneg
@@ -536,37 +541,61 @@ noncomputable def ofβ (β : ℝ≥0) (h_β_pos : 0 < (β : ℝ)) : PositiveTemp
       -- The Boltzmann constant `kB` is nonnegative, which is true by the fact that `0 ≤ kB`
       -- from `kB_nonneg`. QED for this case.
       · exact kB_nonneg
-      -- The real number representation of the inverse temperature `β` is nonnegative, which can be
-      -- shown by applying `NNReal.zero_le` to `β`, since `β` is of type `ℝ≥0`. QED for this case.
-      · exact β.property⟩⟩,
+      -- The positive inverse temperature `β` is strictly positive,
+      -- which implies it is also nonnegative. This can be shown by applying `le_of_lt` to the
+      -- property of `β`, which states that `0 < β`. QED for this case.
+      · exact le_of_lt β.property⟩⟩,
    by
     -- We need to prove that `⊢ 0 < { val := ⟨1 / (kB * ↑β), ⋯⟩ }.val`,
     -- which can be shown by applying `div_pos` to `1` and `kB * β`.
     -- Since `1` is strictly positive, which is true by the fact that `0 < 1` from `one_pos`,
-    -- and `kB` and `β` are strictly positive by `kB_pos` and `h_β_pos`,
+    -- and `kB` and `β` are strictly positive by `kB_pos` and `β.property`, respectively,
     -- we have `kB * β` is strictly positive by `mul_pos`.
     -- Therefore, we can conclude that `1 / (kB * β)` is strictly positive. QED.
-    exact div_pos one_pos (mul_pos kB_pos h_β_pos)⟩
+    exact div_pos one_pos (mul_pos kB_pos β.property)⟩
 
--- TODO: Prove these lemmas, or remove them.
--- /-- Simplification lemma for `PositiveTemperature`:
+/-- Simplification lemma for `PositiveTemperature`:
 
--- Applying `β` to the temperature constructed from `β'` returns `β'`.
--- -/
--- @[simp]
--- lemma β_ofβ (β' : ℝ≥0) (hβ : 0 < (β' : ℝ)) : (ofβ β' hβ).β = β' := by
---   ext
---   simp [β, ofβ, Temperature.toReal, PositiveTemperature.toReal]
---   field_simp [kB_ne_zero]
+Applying `β` to the temperature constructed from `β'` returns `β'`.
+-/
+@[simp]
+lemma β_ofβ (β' : ℝ>0) : β (ofβ β') = β' := by
+  -- We apply the extensionality lemma for `PositiveTemperature` to reduce the goal
+  -- to show that the underlying values of `β (ofβ β')` and `β'` are equal.
+  -- The goal is now `⊢ ↑(ofβ β').β = ↑β'`, both of type `ℝ`.
+  ext
+  -- We unfold the definitions of `β`, `ofβ`, `toReal`, and `Temperature.toReal` to expose the
+  -- raw arithmetic expressions involving `kB` and `β'`.
+  -- The goal becomes `⊢ 1 / (kB * ↑⟨1 / (kB * ↑β'), ⋯⟩) = ↑β'`.
+  simp only [PositiveTemperature.β, PositiveTemperature.ofβ, PositiveTemperature.toReal,
+             Temperature.toReal]
+  -- We simplify the coercion `↑⟨1 / (kB * ↑β'), ⋯⟩` to `1 / (kB * ↑β')` using `NNReal.coe_mk`,
+  -- which states that coercing a value constructed with `⟨x, h⟩` returns `x`.
+  -- The goal becomes `⊢ 1 / (kB * (1 / (kB * ↑β'))) = ↑β'`.
+  simp only [NNReal.coe_mk]
+  -- We use `field_simp` to clear all denominators and simplify the resulting equation,
+  -- using `kB_ne_zero` to discharge the side condition that `kB ≠ 0`.
+  -- After clearing denominators, both sides reduce to the same expression. QED.
+  field_simp [kB_ne_zero]
 
--- /-- Simplification lemma for `PositiveTemperature`:
+/-- Simplification lemma for `PositiveTemperature`:
 
--- Rebuilding a positive temperature `T` from its inverse temperature `β` gives back the original.
--- -/
--- @[simp]
--- lemma ofβ_β (T : PositiveTemperature) : ofβ T.β (β_pos T) = T := by
---   ext
---   simp [β, ofβ, Temperature.toReal, PositiveTemperature.toReal]
---   field_simp [kB_ne_zero]
+Rebuilding a positive temperature `T` from its inverse temperature `β` gives back the original.
+-/
+@[simp]
+lemma ofβ_β (T : PositiveTemperature) : ofβ (β T) = T := by
+  -- We apply the extensionality lemma for `PositiveTemperature` to reduce the goal
+  -- to showing that the underlying values of `ofβ (β T)` and `T` are equal.
+  -- The goal is now `⊢ ↑(↑(ofβ T.β)).val = ↑(↑T).val`, both of type `ℝ`.
+  ext
+  -- We unfold the definitions of `β`, `ofβ`, `Temperature.toReal`, and
+  -- `PositiveTemperature.toReal` to expose the raw arithmetic expressions.
+  -- The `simp` tactic also simplifies coercions and constructor projections.
+  -- The goal becomes `⊢ kB * ↑(↑T).val * kB⁻¹ = ↑(↑T).val`.
+  simp [β, ofβ, Temperature.toReal, PositiveTemperature.toReal]
+  -- We use `field_simp` to clear all denominators and simplify the resulting equation,
+  -- using `kB_ne_zero` to discharge the side condition that `kB ≠ 0`.
+  -- After clearing denominators, both sides reduce to the same expression. QED.
+  field_simp [kB_ne_zero]
 
 end PositiveTemperature
