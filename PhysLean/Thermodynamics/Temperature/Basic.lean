@@ -465,4 +465,14 @@ noncomputable def equiv_β : PositiveTemperature ≃ ℝ>0 where
   left_inv := ofβ_β
   right_inv := β_ofβ
 
+/-- Construct a `PositiveTemperature` from a real-valued inverse temperature,
+defaulting to a junk value for non-positive inputs. Used for `derivWithin` helpers
+that need a total function `ℝ → PositiveTemperature`. -/
+noncomputable def ofβ_real (b : ℝ) : PositiveTemperature :=
+  if h : 0 < b then ofβ ⟨b, h⟩ else ofβ ⟨1, one_pos⟩
+
+@[simp]
+lemma ofβ_real_pos (b : ℝ) (h : 0 < b) : ofβ_real b = ofβ ⟨b, h⟩ := by
+  simp [ofβ_real, h]
+
 end PositiveTemperature

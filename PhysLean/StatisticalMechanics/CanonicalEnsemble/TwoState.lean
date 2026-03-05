@@ -16,7 +16,7 @@ canonical ensemble.
 
 namespace CanonicalEnsemble
 
-open Temperature
+open Temperature PositiveTemperature
 open Real MeasureTheory
 
 /-- The canonical ensemble corresponding to state system, with one state of energy
@@ -32,12 +32,12 @@ instance {E₀ E₁} : IsFinite (twoState E₀ E₁) where
   dof_eq_zero := rfl
   phase_space_unit_eq_one := rfl
 
-lemma twoState_partitionFunction_apply (E₀ E₁ : ℝ) (T : Temperature) :
+lemma twoState_partitionFunction_apply (E₀ E₁ : ℝ) (T : PositiveTemperature) :
     (twoState E₀ E₁).partitionFunction T = exp (- β T * E₀) + exp (- β T * E₁) := by
   rw [partitionFunction_of_fintype, twoState]
   simp [Fin.sum_univ_two]
 
-lemma twoState_partitionFunction_apply_eq_cosh (E₀ E₁ : ℝ) (T : Temperature) :
+lemma twoState_partitionFunction_apply_eq_cosh (E₀ E₁ : ℝ) (T : PositiveTemperature) :
     (twoState E₀ E₁).partitionFunction T =
     2 * exp (- β T * (E₀ + E₁) / 2) * cosh (β T * (E₁ - E₀) / 2) := by
   rw [twoState_partitionFunction_apply, Real.cosh_eq]
@@ -54,7 +54,7 @@ lemma twoState_energy_snd (E₀ E₁ : ℝ) : (twoState E₀ E₁).energy 1 = E�
   rfl
 
 /-- Probability of the first state (energy `E₀`) in closed form. -/
-lemma twoState_probability_fst (E₀ E₁ : ℝ) (T : Temperature) :
+lemma twoState_probability_fst (E₀ E₁ : ℝ) (T : PositiveTemperature) :
     (twoState E₀ E₁).probability T 0 = 1 / 2 * (1 + Real.tanh (β T * (E₁ - E₀) / 2)) := by
   set x := β T * (E₁ - E₀) / 2
   set C := β T * (E₀ + E₁) / 2
@@ -71,7 +71,7 @@ lemma twoState_probability_fst (E₀ E₁ : ℝ) (T : Temperature) :
   ring
 
 /-- Probability of the second state (energy `E₁`) in closed form. -/
-lemma twoState_probability_snd (E₀ E₁ : ℝ) (T : Temperature) :
+lemma twoState_probability_snd (E₀ E₁ : ℝ) (T : PositiveTemperature) :
     (twoState E₀ E₁).probability T 1 = 1 / 2 * (1 - Real.tanh (β T * (E₁ - E₀) / 2)) := by
   set x := β T * (E₁ - E₀) / 2
   set C := β T * (E₀ + E₁) / 2
@@ -87,7 +87,7 @@ lemma twoState_probability_snd (E₀ E₁ : ℝ) (T : Temperature) :
   field_simp
   ring
 
-lemma twoState_meanEnergy_eq (E₀ E₁ : ℝ) (T : Temperature) :
+lemma twoState_meanEnergy_eq (E₀ E₁ : ℝ) (T : PositiveTemperature) :
     (twoState E₀ E₁).meanEnergy T =
     (E₀ + E₁) / 2 - (E₁ - E₀) / 2 * Real.tanh (β T * (E₁ - E₀) / 2) := by
   rw [meanEnergy_of_fintype]
