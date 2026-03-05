@@ -148,24 +148,15 @@ lemma not_lt_zero (T : Temperature) : ¬ T < 0 := not_lt_bot
 lemma toReal_le_toReal {T₁ T₂ : Temperature} (h_le : T₁ ≤ T₂) : (T₁ : ℝ) ≤ (T₂ : ℝ) :=
   NNReal.coe_le_coe.mpr h_le
 
-/-- Lemma for `Temperature`:
-
-The coercion to `ℝ` preserves `<`.
--/
+/-- The coercion to `ℝ` preserves `<`. -/
 lemma toReal_lt_toReal {T₁ T₂ : Temperature} (h_lt : T₁ < T₂) : (T₁ : ℝ) < (T₂ : ℝ) :=
   NNReal.coe_lt_coe.mpr h_lt
 
-/-- Lemma for `Temperature`:
-
-If the coercion to `ℝ` satisfies `≤`, then the temperatures satisfy `≤`.
--/
+/-- If the coercion to `ℝ` satisfies `≤`, then the temperatures satisfy `≤`. -/
 lemma le_of_toReal_le {T₁ T₂ : Temperature} (h_le : (T₁ : ℝ) ≤ (T₂ : ℝ)) : T₁ ≤ T₂ :=
   NNReal.coe_le_coe.mp h_le
 
-/-- Lemma for `Temperature`:
-
-If the coercion to `ℝ` satisfies `<`, then the temperatures satisfy `<`.
--/
+/-- If the coercion to `ℝ` satisfies `<`, then the temperatures satisfy `<`. -/
 lemma lt_of_toReal_lt {T₁ T₂ : Temperature} (h_lt : (T₁ : ℝ) < (T₂ : ℝ)) : T₁ < T₂ :=
   NNReal.coe_lt_coe.mp h_lt
 
