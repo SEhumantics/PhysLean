@@ -119,15 +119,15 @@ lemma le_def {T₁ T₂ : PositiveTemperature} : T₁ ≤ T₂ ↔ T₁.1.val �
 @[simp]
 lemma lt_def {T₁ T₂ : PositiveTemperature} : T₁ < T₂ ↔ T₁.1.val < T₂.1.val := Iff.rfl
 
-/-- `⟨a, ha⟩ ≤ ⟨b, hb⟩` if and only if `a ≤ b` in `Temperature`. -/
-@[simp]
-lemma mk_le_mk {a b : Temperature} {ha : 0 < a.val} {hb : 0 < b.val} :
-    (⟨a, ha⟩ : PositiveTemperature) ≤ (⟨b, hb⟩ : PositiveTemperature) ↔ a ≤ b := Iff.rfl
+/-- The coercion from `PositiveTemperature` to `Temperature` is strictly monotone:
+if `T₁ < T₂` in `PositiveTemperature` then `T₁.1 < T₂.1` in `Temperature`. -/
+lemma strictMono_val : StrictMono (fun T : PositiveTemperature => T.val) :=
+  fun _ _ h => h
 
-/-- `⟨a, ha⟩ < ⟨b, hb⟩` if and only if `a < b` in `Temperature`. -/
-@[simp]
-lemma mk_lt_mk {a b : Temperature} {ha : 0 < a.val} {hb : 0 < b.val} :
-    (⟨a, ha⟩ : PositiveTemperature) < (⟨b, hb⟩ : PositiveTemperature) ↔ a < b := Iff.rfl
+/-- `ofPosReal` is strictly monotone:
+if `a < b` in `ℝ>0` then `ofPosReal a < ofPosReal b`. -/
+lemma strictMono_ofPosReal : StrictMono ofPosReal :=
+  fun _ _ h => h
 
 /-- The coercion to `ℝ` preserves `≤`. -/
 lemma toReal_le_toReal {T₁ T₂ : PositiveTemperature} (h_le : T₁ ≤ T₂) : (T₁ : ℝ) ≤ (T₂ : ℝ) :=

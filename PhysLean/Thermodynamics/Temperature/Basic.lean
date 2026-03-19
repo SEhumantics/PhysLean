@@ -130,13 +130,15 @@ lemma le_def {T₁ T₂ : Temperature} : T₁ ≤ T₂ ↔ T₁.val ≤ T₂.val
 @[simp]
 lemma lt_def {T₁ T₂ : Temperature} : T₁ < T₂ ↔ T₁.val < T₂.val := Iff.rfl
 
-/-- `⟨a⟩ ≤ ⟨b⟩` if and only if `a ≤ b` in `ℝ≥0`. -/
-@[simp]
-lemma mk_le_mk {a b : ℝ≥0} : Temperature.mk a ≤ Temperature.mk b ↔ a ≤ b := Iff.rfl
+/-- The constructor `Temperature.mk` is strictly monotone:
+if `a < b` in `ℝ≥0` then `Temperature.mk a < Temperature.mk b`. -/
+lemma strictMono_mk : StrictMono Temperature.mk :=
+  fun _ _ h => h
 
-/-- `⟨a⟩ < ⟨b⟩` if and only if `a < b` in `ℝ≥0`. -/
-@[simp]
-lemma mk_lt_mk {a b : ℝ≥0} : Temperature.mk a < Temperature.mk b ↔ a < b := Iff.rfl
+/-- `ofNNReal` is strictly monotone:
+if `a < b` in `ℝ≥0` then `ofNNReal a < ofNNReal b`. -/
+lemma strictMono_ofNNReal : StrictMono ofNNReal :=
+  fun _ _ h => h
 
 /-- Absolute zero is the minimum temperature. -/
 @[simp]
