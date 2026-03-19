@@ -3,7 +3,9 @@ Copyright (c) 2025 Joseph Tooby-Smith. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Zhi Kai Pong, Joseph Tooby-Smith, Lode Vermeulen
 -/
-import PhysLean.SpaceAndTime.Space.Derivatives.Laplacian
+module
+
+public import PhysLean.SpaceAndTime.Space.Derivatives.Laplacian
 /-!
 
 # Curl on Space
@@ -41,6 +43,8 @@ We also prove some basic vector-identities involving of the curl operator.
 ## iv. References
 
 -/
+
+@[expose] public section
 
 namespace Space
 
@@ -164,7 +168,7 @@ lemma deriv_coord_2nd_add (f : Space → EuclideanSpace ℝ (Fin 3)) (hf : ContD
     ∂[i] (fun x => ∂[u] (fun x => f x u) x + (∂[v] (fun x => f x v) x + ∂[w] (fun x => f x w) x)) =
     (∂[i] (∂[u] (fun x => f x u))) + (∂[i] (∂[v] (fun x => f x v))) +
     (∂[i] (∂[w] (fun x => f x w))) := by
-  unfold deriv
+  repeat rw [deriv_eq_fderiv_fun]
   ext x
   rw [fderiv_fun_add, fderiv_fun_add]
   simp only [ContinuousLinearMap.add_apply, Pi.add_apply]
@@ -175,7 +179,7 @@ lemma deriv_coord_2nd_add (f : Space → EuclideanSpace ℝ (Fin 3)) (hf : ContD
 lemma deriv_coord_2nd_sub (f : Space → EuclideanSpace ℝ (Fin 3)) (hf : ContDiff ℝ 2 f) :
     ∂[u] (fun x => ∂[v] (fun x => f x w) x - ∂[w] (fun x => f x v) x) =
     (∂[u] (∂[v] (fun x => f x w))) - (∂[u] (∂[w] (fun x => f x v))) := by
-  unfold deriv
+  repeat rw [deriv_eq_fderiv_fun]
   ext x
   simp only [Pi.sub_apply]
   rw [fderiv_fun_sub]

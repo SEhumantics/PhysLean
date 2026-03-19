@@ -3,8 +3,10 @@ Copyright (c) 2026 Gregory J. Loges. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Gregory J. Loges
 -/
-import PhysLean.QuantumMechanics.DDimensions.Operators.Momentum
-import PhysLean.QuantumMechanics.DDimensions.Operators.Position
+module
+
+public import PhysLean.QuantumMechanics.DDimensions.Operators.Momentum
+public import PhysLean.QuantumMechanics.DDimensions.Operators.Position
 /-!
 
 # Hydrogen atom
@@ -23,6 +25,8 @@ but is convenient to include for two reasons:
 - It is what appears in the commutators of the (regularized) LRL vector components.
 
 -/
+
+@[expose] public section
 
 namespace QuantumMechanics
 open SchwartzMap
@@ -48,10 +52,10 @@ variable (H : HydrogenAtom)
 @[simp]
 lemma m_ne_zero : H.m ≠ 0 := by linarith [H.hm]
 
-/-- The hydrogen atom Hamiltonian regularized by `ε > 0` is defined to be
+/-- The hydrogen atom Hamiltonian regularized by `ε ≠ 0` is defined to be
   `𝐇(ε) ≔ (2m)⁻¹𝐩² - k(𝐫(ε)⁻¹ + ½ε²𝐫(ε)⁻³)`. -/
-def hamiltonianReg (ε : ℝ) : 𝓢(Space H.d, ℂ) →L[ℂ] 𝓢(Space H.d, ℂ) :=
-  (2 * H.m)⁻¹ • 𝐩² - H.k • (𝐫[ε,-1] + (2⁻¹ * ε ^ 2) • 𝐫[ε,-3])
+def hamiltonianReg (ε : ℝˣ) : 𝓢(Space H.d, ℂ) →L[ℂ] 𝓢(Space H.d, ℂ) :=
+  (2 * H.m)⁻¹ • 𝐩² - H.k • (𝐫[ε,-1] + (2⁻¹ * ε.1 ^ 2) • 𝐫[ε,-3])
 
 end
 end HydrogenAtom

@@ -3,6 +3,8 @@ Copyright (c) 2026 Joseph Tooby-Smith. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trong-Nghia Be, Matteo Cipollina, Tan-Phuoc-Hung Le, Joseph Tooby-Smith
 -/
+module
+
 import Mathlib.Analysis.Calculus.Deriv.Inv
 import Mathlib.Analysis.InnerProductSpace.Basic
 import PhysLean.StatisticalMechanics.BoltzmannConstant
@@ -16,6 +18,7 @@ In this module we define the type `Temperature` absolute thermodynamic temperatu
 This is the version of temperature most often used in undergraduate and non-mathematical physics.
 -/
 
+@[expose] public section
 /-- The type `Temperature` represents absolute thermodynamic temperature in kelvin.
 It wraps a nonnegative real number, which is the `val` field of the structure.
 -/
