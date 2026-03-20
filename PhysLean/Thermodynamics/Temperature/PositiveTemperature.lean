@@ -9,9 +9,6 @@ public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import PhysLean.StatisticalMechanics.BoltzmannConstant
 public import PhysLean.Mathematics.PosReal
 public import PhysLean.Thermodynamics.Temperature.Basic
-open NNReal
-open Constants
-
 /-!
 # PositiveTemperature
 
@@ -22,6 +19,10 @@ This is the version of temperature most often used in undergraduate and non-math
 We also define the inverse temperature `β` (thermodynamic beta/coldness)
 and its inverse function `ofβ`, which are commonly used in statistical mechanics and thermodynamics.
 -/
+
+open NNReal
+open Constants
+
 
 @[expose] public section
 /-- The type `PositiveTemperature` represents strictly positive absolute thermodynamic temperature
@@ -200,9 +201,8 @@ noncomputable def ofβ (β : ℝ>0) : PositiveTemperature :=
   ⟨
     ⟨1 / (kB * β), by positivity [kB_nonneg, β.property]⟩,
     -- div_pos one_pos (mul_pos kB_pos β.property)
-    by
-      change (0 : ℝ) < _
-      positivity [kB_pos, β.property]
+    by change (0 : ℝ) < _
+       positivity [kB_pos, β.property]
   ⟩
 
 /-- Applying `β` to the temperature constructed from `beta` returns `beta`. -/

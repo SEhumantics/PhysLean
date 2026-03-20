@@ -8,8 +8,6 @@ module
 public import Mathlib.Analysis.Calculus.Deriv.Inv
 public import Mathlib.Analysis.InnerProductSpace.Basic
 public import PhysLean.StatisticalMechanics.BoltzmannConstant
-open NNReal
-open Constants
 
 /-!
 # Temperature
@@ -17,6 +15,9 @@ open Constants
 In this module we define the type `Temperature` absolute thermodynamic temperature in kelvin.
 This is the version of temperature most often used in undergraduate and non-mathematical physics.
 -/
+
+open NNReal
+open Constants
 
 @[expose] public section
 /-- The type `Temperature` represents absolute thermodynamic temperature in kelvin.

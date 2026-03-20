@@ -3,11 +3,15 @@ Copyright (c) 2026 Trong-Nghia Be. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trong-Nghia Be
 -/
-import Mathlib.Data.Real.Basic
+module
+
+public import Mathlib.Data.Real.Basic
 
 /-!
 # Positive real numbers (`ℝ>0`) and extended positive real numbers (`ℝ>0∞`)
 -/
+
+@[expose] public section
 
 /-- The type of strictly positive real numbers. -/
 abbrev PosReal := { x : ℝ // 0 < x }
