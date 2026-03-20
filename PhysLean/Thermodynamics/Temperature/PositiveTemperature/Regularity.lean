@@ -38,8 +38,7 @@ lemma ofβ_continuous : Continuous ofβ := by
   exact continuous_const.div₀ (continuous_const.mul continuous_subtype_val)
     (fun (β : ℝ>0) => mul_ne_zero kB_ne_zero (ne_of_gt β.2))
 
-/-- The real-valued formula underlying `ofβ` is differentiable on `(0, ∞)`.
--/
+/-- The real-valued formula underlying `ofβ` is differentiable on `(0, ∞)`. -/
 lemma ofβ_differentiableOn :
     DifferentiableOn ℝ (fun (β : ℝ) => (1 : ℝ) / (kB * β)) (Set.Ioi 0) := by
   apply DifferentiableOn.fun_div

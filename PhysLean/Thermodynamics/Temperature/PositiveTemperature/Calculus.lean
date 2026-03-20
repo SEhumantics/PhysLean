@@ -28,8 +28,8 @@ open Constants
 open Set
 
 
-/-- The real-valued function mapping `t ↦ 1 / (kB * t)` has the full derivative
-`-1 / (kB * T²)` at the evaluation point `(T : ℝ)`.
+/-- The real-valued function mapping `t ↦ 1 / (kB * t)` has the full derivative `-1 / (kB * T²)`
+at the evaluation point `(T : ℝ)`.
 
 Note that `t` is a positive real variable, since it represents positive temperature.
 -/
@@ -53,10 +53,9 @@ lemma deriv_β_wrt_T (T : PositiveTemperature) : HasDerivAt (fun (t : ℝ) => (1
 
 /-- Chain rule for `β(T)`:
 
-- If `F` is a real-valued function of a real variable,
-and `F` has a derivative `F'` at the point `β(T)`,
-then the composition function `F(β(T))` or `t ↦ F(1 / (kB * t))` has a derivative
-`F' * (-1 / (kB * T²))` at the evaluation point `(T : ℝ)`.
+- If `F` is a real-valued function of a real variable, and `F` has a derivative `F'`
+at the point `β(T)`,  then the composition function `F(β(T))` or `t ↦ F(1 / (kB * t))`
+has a derivative `F' * (-1 / (kB * T²))` at the evaluation point `(T : ℝ)`.
 -/
 lemma chain_rule_T_β {F : ℝ → ℝ} {F' : ℝ} (T : PositiveTemperature)
     (h_F_deriv : HasDerivAt F F' (β T : ℝ)) : HasDerivAt (fun (t : ℝ) => F ((1 : ℝ) / (kB * t)))
