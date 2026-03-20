@@ -26,9 +26,7 @@ namespace PositiveTemperature
 open Constants
 open Filter Topology
 
-/-- Lemma for `PositiveTemperature`:
-
-The function `ofβ` will eventually produce positive temperatures as `β` tends to infinity in `ℝ>0`.
+/-- The function `ofβ` will eventually produce positive temperatures as `β` tends to infinity in `ℝ>0`.
 -/
 lemma eventually_pos_ofβ : ∀ᶠ (β : ℝ>0) in atTop, (PositiveTemperature.ofβ β : ℝ) > 0 := by
   filter_upwards [] with β

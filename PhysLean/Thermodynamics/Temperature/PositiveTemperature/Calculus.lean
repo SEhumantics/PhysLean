@@ -28,9 +28,7 @@ open Constants
 open Set
 
 
-/-- Lemma for `PositiveTemperature`:
-
-The real-valued function mapping `t ↦ 1 / (kB * t)` has the full derivative
+/-- The real-valued function mapping `t ↦ 1 / (kB * t)` has the full derivative
 `-1 / (kB * T²)` at the evaluation point `(T : ℝ)`.
 
 Note that `t` is a positive real variable, since it represents positive temperature.
@@ -53,9 +51,7 @@ lemma deriv_β_wrt_T (T : PositiveTemperature) : HasDerivAt (fun (t : ℝ) => (1
   convert h_deriv_aux using 1
   ring
 
-/-- Lemma for `PositiveTemperature`:
-
-Chain rule for `β(T)`:
+/-- Chain rule for `β(T)`:
 
 - If `F` is a real-valued function of a real variable,
 and `F` has a derivative `F'` at the point `β(T)`,
