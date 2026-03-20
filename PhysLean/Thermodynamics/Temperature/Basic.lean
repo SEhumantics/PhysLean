@@ -5,9 +5,9 @@ Authors: Trong-Nghia Be, Matteo Cipollina, Tan-Phuoc-Hung Le, Joseph Tooby-Smith
 -/
 module
 
-import Mathlib.Analysis.Calculus.Deriv.Inv
-import Mathlib.Analysis.InnerProductSpace.Basic
-import PhysLean.StatisticalMechanics.BoltzmannConstant
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import PhysLean.StatisticalMechanics.BoltzmannConstant
 open NNReal
 open Constants
 
@@ -176,12 +176,12 @@ lemma ofNNReal_lt_ofNNReal {a b : ℝ≥0} : ofNNReal a < ofNNReal b ↔ a < b :
 @[simp]
 lemma val_min (T₁ T₂ : Temperature) : (min T₁ T₂).val = min T₁.val T₂.val := by
   simp only [min_def, le_def]
-  split <;> rfl
+  split_ifs <;> rfl
 
 /-- The `val` of `max T₁ T₂` is `max T₁.val T₂.val`. -/
 @[simp]
 lemma val_max (T₁ T₂ : Temperature) : (max T₁ T₂).val = max T₁.val T₂.val := by
   simp only [max_def, le_def]
-  split <;> rfl
+  split_ifs <;> rfl
 
 end Temperature

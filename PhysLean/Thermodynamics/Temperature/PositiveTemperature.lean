@@ -3,11 +3,12 @@ Copyright (c) 2026 Joseph Tooby-Smith. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trong-Nghia Be, Matteo Cipollina, Tan-Phuoc-Hung Le, Joseph Tooby-Smith
 -/
-import Mathlib.Analysis.Calculus.Deriv.Inv
-import Mathlib.Analysis.InnerProductSpace.Basic
-import PhysLean.StatisticalMechanics.BoltzmannConstant
-import PhysLean.Mathematics.PosReal
-import PhysLean.Thermodynamics.Temperature.Basic
+module
+
+public import Mathlib.Analysis.Calculus.Deriv.Inv
+public import PhysLean.StatisticalMechanics.BoltzmannConstant
+public import PhysLean.Mathematics.PosReal
+public import PhysLean.Thermodynamics.Temperature.Basic
 open NNReal
 open Constants
 
@@ -22,6 +23,7 @@ We also define the inverse temperature `β` (thermodynamic beta/coldness)
 and its inverse function `ofβ`, which are commonly used in statistical mechanics and thermodynamics.
 -/
 
+@[expose] public section
 /-- The type `PositiveTemperature` represents strictly positive absolute thermodynamic temperature
 in kelvin.
 It is defined as a subtype of `Temperature` where the `val` field is strictly positive.
@@ -103,9 +105,11 @@ lemma val_pos (T : PositiveTemperature) : 0 < T.1.val := T.2
 lemma zero_lt_toReal (T : PositiveTemperature) : 0 < (T : ℝ) := T.2
 
 /-- The `val` field of a `PositiveTemperature` is nonzero. -/
+@[simp]
 lemma val_ne_zero (T : PositiveTemperature) : T.1.val ≠ 0 := ne_of_gt (val_pos T)
 
 /-- The real number representation of a `PositiveTemperature` is nonzero. -/
+@[simp]
 lemma toReal_ne_zero (T : PositiveTemperature) : (T : ℝ) ≠ 0 := ne_of_gt (zero_lt_toReal T)
 
 /-- `PositiveTemperature` has a linear order inherited from `Temperature` via the subtype. -/
@@ -120,7 +124,7 @@ lemma le_def {T₁ T₂ : PositiveTemperature} : T₁ ≤ T₂ ↔ T₁.1.val �
 lemma lt_def {T₁ T₂ : PositiveTemperature} : T₁ < T₂ ↔ T₁.1.val < T₂.1.val := Iff.rfl
 
 /-- The coercion from `PositiveTemperature` to `Temperature` is strictly monotone:
-if `T₁ < T₂` in `PositiveTemperature` then `T₁.1 < T₂.1` in `Temperature`. -/
+if `T₁ < T₂` in `PositiveTemperature` then `T₁.val < T₂.val` in `Temperature`. -/
 lemma strictMono_val : StrictMono (fun T : PositiveTemperature => T.val) :=
   fun _ _ h => h
 
@@ -157,13 +161,13 @@ lemma ofPosReal_lt_ofPosReal {a b : ℝ>0} : ofPosReal a < ofPosReal b ↔ a.1 <
 @[simp]
 lemma val_min (T₁ T₂ : PositiveTemperature) : (min T₁ T₂).1.val = min T₁.1.val T₂.1.val := by
   simp only [min_def, le_def]
-  split <;> rfl
+  split_ifs <;> rfl
 
 /-- The `val` of `max T₁ T₂` is `max T₁.1.val T₂.1.val`. -/
 @[simp]
 lemma val_max (T₁ T₂ : PositiveTemperature) : (max T₁ T₂).1.val = max T₁.1.val T₂.1.val := by
   simp only [max_def, le_def]
-  split <;> rfl
+  split_ifs <;> rfl
 
 /-!
 ## Inverse temperature `β` and its inverse function `ofβ`
@@ -179,7 +183,6 @@ noncomputable def β (T : PositiveTemperature) : ℝ>0 :=
     positivity [kB_pos, zero_lt_toReal T]⟩
 
 /-- The definition of `β T` unfolds to its explicit formula in terms of `kB` and `T`. -/
-@[simp]
 lemma β_eq (T : PositiveTemperature) : β T =
     ⟨1 / (kB * (T : ℝ)), by
     positivity [kB_pos, zero_lt_toReal T]⟩:= rfl
@@ -189,6 +192,7 @@ lemma β_eq (T : PositiveTemperature) : β T =
 lemma β_toReal (T : PositiveTemperature) : (β T : ℝ) = (1 : ℝ) / (kB * (T : ℝ)) := rfl
 
 /-- The inverse temperature `β` is strictly positive for positive temperatures. -/
+@[simp]
 lemma β_pos (T : PositiveTemperature) : 0 < (β T : ℝ) := (β T).2
 
 /-- Construct a `PositiveTemperature` from a positive inverse temperature `β`. -/
@@ -225,7 +229,8 @@ noncomputable def equiv_β : PositiveTemperature ≃ ℝ>0 where
   left_inv := ofβ_β
   right_inv := β_ofβ
 
-/-- The thermodynamic beta strictly reverses the order of temperatures. -/
+/-- The thermodynamic beta is antitone:
+if `T₁ ≤ T₂` then `β T₂ ≤ β T₁`, i.e. higher temperature means lower inverse temperature. -/
 lemma β_antitone : Antitone β := by
   intro T₁ T₂ h
   show (β T₂ : ℝ) ≤ (β T₁ : ℝ)
@@ -233,7 +238,9 @@ lemma β_antitone : Antitone β := by
   exact one_div_le_one_div_of_le (mul_pos kB_pos (zero_lt_toReal T₁))
     (mul_le_mul_of_nonneg_left (toReal_le_toReal h) kB_pos.le)
 
-/-- The thermodynamic beta strictly reverses strict inequalities. -/
+/-- The thermodynamic beta is strictly antitone:
+if `T₁ < T₂` then `β T₂ < β T₁`, i.e. strictly higher temperature gives strictly lower
+inverse temperature. -/
 lemma β_strictAnti : StrictAnti β :=
   β_antitone.strictAnti_of_injective (equiv_β.injective)
 
