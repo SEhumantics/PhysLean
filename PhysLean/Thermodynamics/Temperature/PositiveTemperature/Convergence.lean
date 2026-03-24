@@ -44,8 +44,7 @@ private lemma tendsto_const_inv_mul_atTop (a : ℝ) (h_a_pos : 0 < a) :
 /-- As the inverse temperature `β` tends to infinity, the real-valued representation
 of the temperature `ofβ β` tends to `0` in the sense of the metric space distance. -/
 lemma tendsto_toReal_ofβ_atTop :
-    Tendsto (fun (β : ℝ>0) => (PositiveTemperature.ofβ β : ℝ)) atTop (𝓝 (0 : ℝ)) := by
-  exact tendsto_const_inv_mul_atTop kB kB_pos
+    Tendsto (fun (β : ℝ>0) => (PositiveTemperature.ofβ β : ℝ)) atTop (𝓝 (0 : ℝ)) := tendsto_const_inv_mul_atTop kB kB_pos
 
 /-- As the inverse temperature `β` tends to infinity, the real-valued representation
 of the temperature `ofβ β` tends to `0` from above (within the interval `(0, ∞)`). -/
@@ -54,13 +53,6 @@ lemma tendsto_ofβ_atTop : Tendsto (fun (β : ℝ>0) => (PositiveTemperature.of�
   have h_tendsto_nhds_zero := tendsto_toReal_ofβ_atTop
   have h_tendsto_principal_Ioi : Tendsto (fun (β : ℝ>0) => (PositiveTemperature.ofβ β : ℝ))
     atTop (𝓟 (Set.Ioi (0 : ℝ))) := tendsto_principal.mpr eventually_pos_ofβ
-  have h_tendsto_inf :
-      Tendsto (fun (β : ℝ>0) =>
-        (PositiveTemperature.ofβ β : ℝ))
-        atTop
-        ((nhds (0 : ℝ)) ⊓ 𝓟 (Set.Ioi (0 : ℝ))) :=
-    tendsto_inf.mpr
-      ⟨h_tendsto_nhds_zero, h_tendsto_principal_Ioi⟩
-  simpa [nhdsWithin] using h_tendsto_inf
+  simpa [nhdsWithin] using tendsto_inf.mpr ⟨h_tendsto_nhds_zero, h_tendsto_principal_Ioi⟩
 
 end PositiveTemperature
