@@ -35,21 +35,10 @@ Note that `t` is a positive real variable, since it represents positive temperat
 -/
 lemma deriv_β_wrt_T (T : PositiveTemperature) : HasDerivAt (fun (t : ℝ) => (1 : ℝ) / (kB * t))
     (-1 / (kB * (T : ℝ)^2)) (T : ℝ) := by
-  have h_T_ne_zero : (T : ℝ) ≠ 0 := by
-    exact ne_of_gt T.zero_lt_toReal
-  have h_f_def : (fun (t : ℝ) => (1 : ℝ) / (kB * t)) = fun (t : ℝ) => (kB)⁻¹ * t⁻¹ := by
-    simp only [one_div, mul_inv_rev]
-    funext T
+  convert ((hasDerivAt_inv (x := (T : ℝ)) (ne_of_gt T.zero_lt_toReal)).const_mul (kB)⁻¹) using 1
+  · ext t
     ring
-  have h_t_inv_deriv : HasDerivAt (fun (t : ℝ) => t⁻¹)
-      (-((T : ℝ) ^ 2)⁻¹) (T : ℝ) := by
-    exact (hasDerivAt_inv (x := (T : ℝ)) h_T_ne_zero)
-  have h_deriv_aux : HasDerivAt (fun (t : ℝ) => (kB)⁻¹ * t⁻¹)
-      ((kB)⁻¹ * (-((T : ℝ) ^ 2)⁻¹)) (T : ℝ) := by
-    exact h_t_inv_deriv.const_mul ((kB)⁻¹)
-  rw [h_f_def]
-  convert h_deriv_aux using 1
-  ring
+  · ring
 
 /-- Chain rule for `β(T)`:
 
@@ -59,9 +48,6 @@ has a derivative `F' * (-1 / (kB * T²))` at the evaluation point `(T : ℝ)`.
 -/
 lemma chain_rule_T_β {F : ℝ → ℝ} {F' : ℝ} (T : PositiveTemperature)
     (h_F_deriv : HasDerivAt F F' (β T : ℝ)) : HasDerivAt (fun (t : ℝ) => F ((1 : ℝ) / (kB * t)))
-    (F' * (-1 / (kB * (T : ℝ)^2))) (T : ℝ) := by
-  have h_β_deriv := deriv_β_wrt_T T
-  have h_comp := h_F_deriv.comp (T : ℝ) h_β_deriv
-  convert h_comp using 1
+    (F' * (-1 / (kB * (T : ℝ)^2))) (T : ℝ) := h_F_deriv.comp (T : ℝ) (deriv_β_wrt_T T)
 
 end PositiveTemperature
