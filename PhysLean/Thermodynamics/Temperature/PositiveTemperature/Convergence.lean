@@ -44,7 +44,8 @@ private lemma tendsto_const_inv_mul_atTop (a : ℝ) (h_a_pos : 0 < a) :
 /-- As the inverse temperature `β` tends to infinity, the real-valued representation
 of the temperature `ofβ β` tends to `0` in the sense of the metric space distance. -/
 lemma tendsto_toReal_ofβ_atTop :
-    Tendsto (fun (β : ℝ>0) => (PositiveTemperature.ofβ β : ℝ)) atTop (𝓝 (0 : ℝ)) := tendsto_const_inv_mul_atTop kB kB_pos
+    Tendsto (fun (β : ℝ>0) => (PositiveTemperature.ofβ β : ℝ)) atTop (𝓝 (0 : ℝ)) :=
+      tendsto_const_inv_mul_atTop kB kB_pos
 
 /-- As the inverse temperature `β` tends to infinity, the real-valued representation
 of the temperature `ofβ β` tends to `0` from above (within the interval `(0, ∞)`). -/
