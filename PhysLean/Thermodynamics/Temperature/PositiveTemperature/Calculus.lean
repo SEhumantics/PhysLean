@@ -3,6 +3,8 @@ Copyright (c) 2026 Joseph Tooby-Smith. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Trong-Nghia Be, Matteo Cipollina, Tan-Phuoc-Hung Le, Joseph Tooby-Smith
 -/
+module
+
 import Mathlib.Analysis.Calculus.Deriv.Inv
 import PhysLean.Thermodynamics.Temperature.Basic
 import PhysLean.Mathematics.PosReal
